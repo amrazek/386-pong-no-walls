@@ -29,3 +29,18 @@ class Ball(pygame.sprite.Sprite):
         self.position += self.velocity * elapsed_seconds
         self.rect.centerx = int(self.position.x)
         self.rect.centery = int(self.position.y)
+
+
+class Paddle(pygame.sprite.Sprite):
+    def __init__(self, size):
+        super(Paddle, self).__init__()
+        self.size = size
+        self.image = pygame.Surface(size)
+        self.rect = pygame.Rect(0, 0, size[0], size[1])
+
+        yellow = (255, 242, 0)
+        self.image.fill(yellow)
+        self.image = self.image.convert()
+
+    def update(self, elapsed_seconds):
+        pass  # todo
