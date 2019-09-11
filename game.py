@@ -3,6 +3,7 @@ import sys
 from pygame.locals import *
 from entities import *
 from input import *
+import controllers
 
 window_size = (800, 400)
 bkg_color = (0, 0, 0)
@@ -29,29 +30,36 @@ center_vertical_bounds_left = pygame.Rect(0, 0, pdl_short, window_size[1])
 center_vertical_bounds_right = center_vertical_bounds_left.copy()
 center_vertical_bounds_right.left = window_size[0] - pdl_short
 
-ball = Ball(screen, 10, pygame.color.Color('#FF0000'), pygame.Vector2(100, 0))
-player_center = Paddle((20, 100), 100, center_vertical_bounds_right)
-player_top = Paddle((100, 20), 100, top_horizontal_bounds, style=MovementStyle.HORIZONTAL)
-player_bottom = Paddle((100, 20), 100, bottom_horizontal_bounds, style=MovementStyle.HORIZONTAL)
+ball = Ball(screen, 10, pygame.color.Color('#FF0000'), pygame.Vector2(400, 0))
+player_center = Paddle((20, 100), 400, center_vertical_bounds_right)
+player_top = Paddle((100, 20), 400, top_horizontal_bounds)
+player_bottom = Paddle((100, 20), 400, bottom_horizontal_bounds)
 
-sprites = pygame.sprite.Group(ball)
-sprites.add(player_center)
-sprites.add(player_top)
-sprites.add(player_bottom)
+paddles = pygame.sprite.Group()
+paddles.add(player_center)
+paddles.add(player_top)
+paddles.add(player_bottom)
+
+balls = pygame.sprite.Group(ball)
+
+player = controllers.PlayerController(input, player_center, [player_top, player_bottom])
 
 elapsed_time = 0.0
 
 while not input.quit:
     input.event_loop()
 
-    handle_player_input(input, bottom=player_bottom, top=player_top, vertical=player_center)
+    #handle_player_input(input, bottom=player_bottom, top=player_top, vertical=player_center)
+    player.update()
 
     # update all sprites
-    sprites.update(elapsed_time)
+    paddles.update(elapsed_time)
+    balls.update(paddles, elapsed_time)
 
     # render all sprites
     screen.fill(bkg_color)
-    sprites.draw(screen)
+    paddles.draw(screen)
+    balls.draw(screen)
     pygame.display.flip()
 
     # limit FPS to 60, but otherwise execute as quickly as possible

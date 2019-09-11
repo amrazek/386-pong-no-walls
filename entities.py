@@ -1,12 +1,13 @@
 import pygame
 from pygame.locals import *
 import math
+import helper
 from enum import Enum
 
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self, screen, radius, ball_color, velocity_vector):
-        super(Ball, self).__init__()
+        super().__init__()
 
         self.velocity = velocity_vector
         self.radius = radius
@@ -26,72 +27,71 @@ class Ball(pygame.sprite.Sprite):
 
         self.rect = pygame.Rect(200, 200, radius, radius)
 
-    def update(self, elapsed_seconds):
-        self.position += self.velocity * elapsed_seconds
-        self.rect.centerx = int(self.position.x)
-        self.rect.centery = int(self.position.y)
+    def update(self, paddles, elapsed_seconds):
+        delta_position = self.velocity * elapsed_seconds
+
+        next_rect = pygame.Rect(self.rect.centerx - self.radius, self.rect.centery - self.radius, self.radius, self.radius)
+        next_rect.centerx += delta_position.x
+
+        for paddle in paddles:
+            if next_rect.colliderect(paddle.rect):
+                delta_position.x = 0
+                self.velocity.x *= -1
+                break
+
+        self.rect.centerx += delta_position.x
+
+        next_rect.centery += delta_position.y
+
+        for paddle in paddles:
+            if next_rect.colliderect(paddle.rect):
+                delta_position.y = 0
+                self.velocity.y *= -1
+                break
+
+        self.rect.centery += delta_position.y
 
 
-class MovementStyle(Enum):
-    VERTICAL = 0
-    HORIZONTAL = 1
+
+class MovementDirection(Enum):
+    LEFT = pygame.Vector2(-1, 0)
+    RIGHT = pygame.Vector2(1, 0)
+    UP = pygame.Vector2(0, -1)
+    DOWN = pygame.Vector2(0, 1)
+    STOP = pygame.Vector2()
 
 
 class Paddle(pygame.sprite.Sprite):
-    def __init__(self, size, speed, bounds, style=MovementStyle.VERTICAL):
+    def __init__(self, size, speed, bounds):
         super().__init__()
 
         self.speed = speed
-        self.bounds = bounds
         self.size = size
-        self.style = style
+        self.bounds = bounds
+        self.velocity = pygame.Vector2()
+        self.position = pygame.Vector2()
+
         self.image = pygame.Surface(size)
         self.rect = pygame.Rect(0, 0, size[0], size[1])
 
-        if style == MovementStyle.VERTICAL:
-            self.min_position = self.bounds.top + size[1] * 0.5
-            self.max_position = self.bounds.bottom - size[1] * 0.5
-        else:
-            self.min_position = self.bounds.left + size[0] * 0.5
-            self.max_position = self.bounds.right - size[0] * 0.5
+        self.position.x = self.rect.centerx
+        self.position.y = self.rect.centery
 
         yellow = (255, 242, 0)
         self.image.fill(yellow)
         self.image = self.image.convert()
 
-        self.position = bounds.centery if style == MovementStyle.VERTICAL else bounds.centerx
-        self.target_position = self.position
+    def update(self, elapsed):
+        move_amount = self.velocity * self.speed * elapsed
 
-    def __calculate_movement(self, elapsed):
-        distance_to_target = self.target_position - self.position
-        return self.speed * elapsed, distance_to_target
+        self.position += move_amount
 
-    def update(self, elapsed_seconds):
-        movement, dist_left = self.__calculate_movement(elapsed_seconds)
-        direction = 1.0 if dist_left > 0 else -1.0
+        helper.rect_clamp_point_ip(self.bounds, self.position)
 
-        if movement > math.fabs(dist_left):
-            self.position = self.target_position
-        else:
-            self.position += movement * direction
-            self.position = self.min_position if self.position < self.min_position else self.position
-            self.position = self.max_position if self.position > self.max_position else self.position
-
-        self.__update_rect()
-
-    def __update_rect(self):
-        if self.style == MovementStyle.VERTICAL:
-            self.rect.centery = self.position
-        else:
-            self.rect.centerx = self.position
+        self.rect.centerx = self.position.x
+        self.rect.centery = self.position.y
 
         self.rect.clamp_ip(self.bounds)
 
-    def move_to(self, position):
-        self.target_position = position
-
-    def get_position(self):
-        return self.position
-
-    def get_bounds(self):
-        return self.bounds
+    def move(self, direction=MovementDirection.STOP):
+        self.velocity = direction.value
