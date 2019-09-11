@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-
+import math
 
 class Ball(pygame.sprite.Sprite):
     def __init__(self, screen, radius, ball_color, velocity_vector):
@@ -32,8 +32,12 @@ class Ball(pygame.sprite.Sprite):
 
 
 class Paddle(pygame.sprite.Sprite):
-    def __init__(self, size):
-        super(Paddle, self).__init__()
+    def __init__(self, size, speed, bounds):
+        #super(Paddle, self).__init__()
+        super().__init__()
+
+        self.speed = speed
+        self.bounds = bounds
         self.size = size
         self.image = pygame.Surface(size)
         self.rect = pygame.Rect(0, 0, size[0], size[1])
@@ -42,5 +46,48 @@ class Paddle(pygame.sprite.Sprite):
         self.image.fill(yellow)
         self.image = self.image.convert()
 
+        self.position = bounds.centery
+        self.target_position = self.position
+
+    def __calculate_movement(self, elapsed):
+        distance_to_target = self.target_position - self.position
+        return self.speed * elapsed, distance_to_target
+
     def update(self, elapsed_seconds):
-        pass  # todo
+        movement, dist_left = self.__calculate_movement(elapsed_seconds)
+        direction = 1.0 if dist_left > 0 else -1.0
+
+        if movement > math.fabs(dist_left):
+            self.position = self.target_position
+        else:
+            self.position += movement * direction
+
+        self.__update_rect()
+
+    def __update_rect(self):
+        raise NotImplementedError
+
+    def move_to(self, position):
+        self.target_position = position
+
+    def get_position(self):
+        return self.position
+
+
+# class HorizontalPaddle(Paddle):
+#     def __init__(self, size, speed, bounds):
+#         super().__init__(size, speed, bounds)
+#
+#         self.position = self.bounds.centerx
+#
+#     def __update_rect(self):
+#         self.rect.centerx = self.position
+#         self.rect.clamp_ip(self.bounds)
+#
+# class VerticalPaddle(Paddle):
+#     def __init__(self, size, speed, bounds):
+#         super().__init__(size, speed, bounds)
+#
+#     def __update_rect(self):
+#         self.rect.centery = self.position
+#         self.rect.clamp_ip(self.bounds)
