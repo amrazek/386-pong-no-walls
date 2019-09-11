@@ -4,7 +4,7 @@ from pygame.locals import *
 from entities import *
 from input import *
 
-window_size = (400, 400)
+window_size = (800, 400)
 bkg_color = (0, 0, 0)
 
 screen = pygame.display.set_mode(size=window_size, flags=HWSURFACE)
@@ -21,7 +21,7 @@ half_width = window_size[0] * 0.5
 half_height = window_size[1] * 0.5
 
 
-top_horizontal_bounds = pygame.Rect(half_width, 0, half_width, pdl_short)
+top_horizontal_bounds = pygame.Rect(half_width, 0, half_width - pdl_short, pdl_short)
 bottom_horizontal_bounds = top_horizontal_bounds.copy()
 bottom_horizontal_bounds.top = window_size[1] - pdl_short
 
@@ -30,9 +30,9 @@ center_vertical_bounds_right = center_vertical_bounds_left.copy()
 center_vertical_bounds_right.left = window_size[0] - pdl_short
 
 ball = Ball(screen, 10, pygame.color.Color('#FF0000'), pygame.Vector2(100, 0))
-player_center = VerticalPaddle((20, 100), 100, center_vertical_bounds_right)
-player_top = HorizontalPaddle((100, 20), 100, top_horizontal_bounds)
-player_bottom = HorizontalPaddle((100, 20), 100, bottom_horizontal_bounds)
+player_center = Paddle((20, 100), 100, center_vertical_bounds_right)
+player_top = Paddle((100, 20), 100, top_horizontal_bounds, style=MovementStyle.HORIZONTAL)
+player_bottom = Paddle((100, 20), 100, bottom_horizontal_bounds, style=MovementStyle.HORIZONTAL)
 
 sprites = pygame.sprite.Group(ball)
 sprites.add(player_center)
@@ -44,7 +44,7 @@ elapsed_time = 0.0
 while not input.quit:
     input.event_loop()
 
-    handle_player_input(input, board_bounds, bottom=player_bottom, top=player_top, vertical=player_center)
+    handle_player_input(input, bottom=player_bottom, top=player_top, vertical=player_center)
 
     # update all sprites
     sprites.update(elapsed_time)

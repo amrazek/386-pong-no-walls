@@ -27,20 +27,20 @@ class Input:
                     self.down = state
 
 
-def handle_player_input(input, board_bounds, vertical, top, bottom):
-    if (input.left and input.right) or not input.left and not input.right:
+def handle_player_input(input, vertical, top, bottom):
+    if (input.left and input.right) or (not input.left and not input.right):
         top.move_to(top.get_position())
         bottom.move_to(bottom.get_position())
     elif input.left:
-        top.move_to(board_bounds.left)
-        bottom.move_to(board_bounds.left)
+        top.move_to(top.get_bounds().left)
+        bottom.move_to(bottom.get_bounds().left)
     else:
-        top.move_to(board_bounds.right)
-        bottom.move_to(board_bounds.right)
+        top.move_to(top.get_bounds().right)
+        bottom.move_to(bottom.get_bounds().right)
 
     if (input.up and input.down) or (not input.up and not input.down):
         vertical.move_to(vertical.get_position())
     elif input.up:
-        vertical.move_to(board_bounds.top)
+        vertical.move_to(vertical.get_bounds().top)
     else:
-        vertical.move_to(board_bounds.bottom)
+        vertical.move_to(vertical.get_bounds().bottom)
