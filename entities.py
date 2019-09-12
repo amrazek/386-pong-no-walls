@@ -136,3 +136,17 @@ class Net(pygame.sprite.Sprite):
             fill_rect.clip(self.image.get_rect())
 
             self.image.fill(color=dash_color, rect=fill_rect)
+
+
+class TextSprite(pygame.sprite.Sprite):
+    def __init__(self, text="", font="consolas", size=16, color=(255,255,255)):
+        self.text = text
+        self.font = pygame.SysFont(font, size)
+        self.color = color
+        self.__update_image()
+
+    def __update_image(self):
+        self.image = self.font.render(text=self.text, color=self.color)
+        self.rect.width = self.image.get_width()
+        self.rect.height = self.image.get_height()
+

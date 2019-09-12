@@ -15,6 +15,7 @@ computer_color = (255, 0, 0)
 
 screen = pygame.display.set_mode(size=window_size, flags=HWSURFACE)
 pygame.display.set_caption("Pong No Walls")
+pygame.font.init()
 clock = pygame.time.Clock()
 input = Input()
 
@@ -54,6 +55,9 @@ computer_bottom = Paddle((100, pdl_short), 400, bottom_horizontal_bounds, comput
 # net
 net = Net(board_bounds, 10, 30)
 
+# scores
+player_score = TextSprite("Player = 0")
+computer_score = TextSprite("Computer = 0")
 
 paddles = pygame.sprite.Group()
 paddles.add(player_center)
@@ -69,6 +73,7 @@ computer = controllers.ComputerController(computer_center, [computer_top, comput
 computer_right = controllers.ComputerController(player_center, [player_top, player_bottom])
 
 decoration = pygame.sprite.Group(net)
+scores = pygame.sprite.Group([player_score, computer_score])
 
 elapsed_time = 0.0
 
