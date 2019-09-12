@@ -73,7 +73,7 @@ computer = controllers.ComputerController(computer_center, [computer_top, comput
 computer_right = controllers.ComputerController(player_center, [player_top, player_bottom])
 
 decoration = pygame.sprite.Group(net)
-scores = pygame.sprite.Group([player_score, computer_score])
+scores = pygame.sprite.Group(player_score, computer_score)
 
 elapsed_time = 0.0
 
@@ -94,6 +94,7 @@ while not input.quit:
     decoration.draw(screen)
     paddles.draw(screen)
     balls.draw(screen)
+    scores.draw(screen)
     pygame.display.flip()
 
     # limit FPS to 60, but otherwise execute as quickly as possible

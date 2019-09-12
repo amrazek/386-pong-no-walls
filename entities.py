@@ -140,13 +140,18 @@ class Net(pygame.sprite.Sprite):
 
 class TextSprite(pygame.sprite.Sprite):
     def __init__(self, text="", font="consolas", size=16, color=(255,255,255)):
+        super().__init__()
         self.text = text
-        self.font = pygame.SysFont(font, size)
+        self.font = pygame.sysfont.SysFont(font, size)
         self.color = color
+        self.rect = pygame.Rect(0, 0, size, size)
         self.__update_image()
 
     def __update_image(self):
-        self.image = self.font.render(text=self.text, color=self.color)
+        self.image = self.font.render(self.text, False, self.color)
         self.rect.width = self.image.get_width()
         self.rect.height = self.image.get_height()
 
+    def set_position(self, position):
+        self.rect.left = position.x
+        self.rect.top = position.y
