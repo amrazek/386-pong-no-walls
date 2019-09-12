@@ -106,3 +106,33 @@ class Paddle(pygame.sprite.Sprite):
 
     def get_position(self):
         return self.position
+
+
+class Net(pygame.sprite.Sprite):
+    def __init__(self, board_bounds, net_width, dash_length, dash_color=(255, 255, 255)):
+        super().__init__()
+
+        # generate an appropriate net surface - no sense in doing this
+        # every single frame
+        self.rect = pygame.Rect(0, 0, net_width, board_bounds.height)
+        self.rect.center = board_bounds.center
+
+        self.image = pygame.Surface((net_width, board_bounds.height))
+
+        self.image.fill(color=(0, 0, 0))  # fill with black
+
+        # generate dashes
+        dash_rect = pygame.Rect(0, 0, net_width, dash_length)
+        dash_rect.centery = 0
+
+        # calculate offset such that the first and last dash will have the
+        # same amount of space between their edge and the edge of the board
+        num_dashes = self.image.get_height() / (dash_length * 2);
+        offset = int((num_dashes - math.floor(num_dashes)) * dash_length)
+
+        for y in range(offset, self.image.get_height() + dash_length + offset, dash_length * 2):
+            fill_rect = dash_rect.copy()
+            fill_rect.centery = y
+            fill_rect.clip(self.image.get_rect())
+
+            self.image.fill(color=dash_color, rect=fill_rect)

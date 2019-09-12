@@ -51,6 +51,10 @@ computer_center = Paddle((pdl_short, 100), 400, center_vertical_bounds_left, com
 computer_top = Paddle((100, pdl_short), 400, top_horizontal_bounds, computer_color)
 computer_bottom = Paddle((100, pdl_short), 400, bottom_horizontal_bounds, computer_color)
 
+# net
+net = Net(board_bounds, 10, 30)
+
+
 paddles = pygame.sprite.Group()
 paddles.add(player_center)
 paddles.add(player_top)
@@ -62,6 +66,9 @@ balls = pygame.sprite.Group(ball)
 
 player = controllers.PlayerController(input, player_center, [player_top, player_bottom])
 computer = controllers.ComputerController(computer_center, [computer_top, computer_bottom])
+computer_right = controllers.ComputerController(player_center, [player_top, player_bottom])
+
+decoration = pygame.sprite.Group(net)
 
 elapsed_time = 0.0
 
@@ -70,13 +77,16 @@ while not input.quit:
 
     player.update()
     computer.update(ball)
+    computer_right.update(ball)  # temp: have computer play itself
 
     # update all sprites
     paddles.update(elapsed_time)
     balls.update(paddles, elapsed_time)
+    decoration.update(elapsed_time)
 
     # render all sprites
     screen.fill(bkg_color)
+    decoration.draw(screen)
     paddles.draw(screen)
     balls.draw(screen)
     pygame.display.flip()
