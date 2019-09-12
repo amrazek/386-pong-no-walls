@@ -25,32 +25,41 @@ class Ball(pygame.sprite.Sprite):
 
         pygame.draw.circle(self.image, ball_color, (radius, radius), radius)
 
-        self.rect = pygame.Rect(200, 200, radius, radius)
+        self.rect = pygame.Rect(200, 200, radius * 2, radius * 2)
 
     def update(self, paddles, elapsed_seconds):
         delta_position = self.velocity * elapsed_seconds
 
-        next_rect = pygame.Rect(self.rect.centerx - self.radius, self.rect.centery - self.radius, self.radius, self.radius)
+        # attempt to move in x direction
+        next_rect = pygame.Rect(self.position.x - self.radius, self.position.y - self.radius, self.radius * 2, self.radius * 2)
         next_rect.centerx += delta_position.x
 
         for paddle in paddles:
             if next_rect.colliderect(paddle.rect):
                 delta_position.x = 0
                 self.velocity.x *= -1
+                next_rect = self.rect
                 break
 
-        self.rect.centerx += delta_position.x
+        self.rect = next_rect  # accept delta x change
+        self.position.x += delta_position.x
 
+        # attempt to move in y direction
+        next_rect = next_rect.copy()
         next_rect.centery += delta_position.y
 
         for paddle in paddles:
             if next_rect.colliderect(paddle.rect):
                 delta_position.y = 0
                 self.velocity.y *= -1
+                next_rect = self.rect
                 break
 
-        self.rect.centery += delta_position.y
+        self.rect = next_rect
+        self.position.y += delta_position.y
 
+    def get_position(self):
+        return self.position
 
 
 class MovementDirection(Enum):
@@ -62,23 +71,22 @@ class MovementDirection(Enum):
 
 
 class Paddle(pygame.sprite.Sprite):
-    def __init__(self, size, speed, bounds):
+    def __init__(self, size, speed, bounds, color=(255, 242, 0)):
         super().__init__()
 
         self.speed = speed
         self.size = size
-        self.bounds = bounds
+        self.bounds = bounds.copy()
         self.velocity = pygame.Vector2()
         self.position = pygame.Vector2()
 
         self.image = pygame.Surface(size)
         self.rect = pygame.Rect(0, 0, size[0], size[1])
 
-        self.position.x = self.rect.centerx
-        self.position.y = self.rect.centery
+        self.position.x = self.bounds.centerx
+        self.position.y = self.bounds.centery
 
-        yellow = (255, 242, 0)
-        self.image.fill(yellow)
+        self.image.fill(color)
         self.image = self.image.convert()
 
     def update(self, elapsed):
@@ -95,3 +103,6 @@ class Paddle(pygame.sprite.Sprite):
 
     def move(self, direction=MovementDirection.STOP):
         self.velocity = direction.value
+
+    def get_position(self):
+        return self.position
