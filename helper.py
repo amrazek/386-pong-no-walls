@@ -1,4 +1,5 @@
 import pygame
+import collections
 
 def rect_clamp_point_ip(rect, point):
     if point[0] < rect.left:
@@ -10,3 +11,5 @@ def rect_clamp_point_ip(rect, point):
         point[1] = rect.top
     elif point[1] > rect.bottom:
         point[1] = rect.bottom
+
+Dimensions = collections.namedtuple('Dimensions', 'width height')
