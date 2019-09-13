@@ -31,7 +31,7 @@ class GameState:
 
     @classmethod
     def create(cls):
-        return GameState(input)
+        return GameState()
 
     def next_state(self):
         return None
@@ -104,6 +104,7 @@ state = GameState.create()
 
 while not input.quit and not state.is_finished():
     input.event_loop()
+    state.update(elapsed_time)
 
     state.draw(screen)
     pygame.display.flip()

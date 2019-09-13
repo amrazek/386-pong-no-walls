@@ -6,12 +6,12 @@ from enum import Enum
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, screen, radius, ball_color, velocity_vector):
+    def __init__(self, bounds, radius, ball_color, velocity_vector):
         super().__init__()
 
         self.velocity = velocity_vector
         self.radius = radius
-        self.bounds = pygame.Rect(0, 0, screen.get_width(), screen.get_height())
+        self.bounds = bounds
         self.position = pygame.Vector2(self.bounds.centerx, self.bounds.centery)
 
         # this will be an image later, so might as well save some time and
