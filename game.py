@@ -31,7 +31,7 @@ class GameState:
         self.board = Board(input=input,
                            size=window_size,
                            left_player_generator=controllers.ComputerController,
-                           right_player_generator=controllers.DefaultPlayer)
+                           right_player_generator=controllers.ComputerController)
 
     @classmethod
     def create(cls):
@@ -60,23 +60,6 @@ while not input.quit and not state.is_finished():
 
     state.draw(screen)
     pygame.display.flip()
-
-    # player.update()
-    # computer.update(ball)
-    # computer_right.update(ball)  # temp: have computer play itself
-
-    # update all sprites
-    # paddles.update(elapsed_time)
-    # balls.update(paddles, elapsed_time)
-    # decoration.update(elapsed_time)
-
-    # render all sprites
-    # screen.fill(bkg_color)
-    # decoration.draw(screen)
-    # paddles.draw(screen)
-    # balls.draw(screen)
-    # scores.draw(screen)
-    # pygame.display.flip()
 
     # limit FPS to 60, but otherwise execute as quickly as possible
     elapsed_time = clock.tick_busy_loop(60) / 1000.0

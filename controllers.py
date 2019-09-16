@@ -69,6 +69,7 @@ class ComputerController(DefaultPlayer):
         # handle center paddle
         # decide which direction to move it (or if it should not be moved at all)
         in_dead_zone = ComputerController._dist_squared(vertical_pos, ball_pos.y) < self.dead_zone_y
+        in_dead_zone = False  # temp!
 
         if ball_pos.y < vertical_pos and not in_dead_zone:
             self.vertical.move(MovementDirection.UP)
@@ -77,8 +78,8 @@ class ComputerController(DefaultPlayer):
         else:
             self.vertical.move(MovementDirection.STOP)
 
-        direction = MovementDirection.UP if self.vertical.get_position().y > ball.get_position().y else MovementDirection.DOWN
-        self.vertical.move(direction)
+        # direction = MovementDirection.UP if self.vertical.get_position().y > ball.get_position().y else MovementDirection.DOWN
+        # self.vertical.move(direction)
 
         # handle horizontal paddles
         in_dead_zone = ComputerController._dist_squared(self.horizontal_paddles[0].get_position().x, ball_pos.x) < self.dead_zone_x

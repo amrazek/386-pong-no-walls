@@ -95,16 +95,15 @@ class Paddle(pygame.sprite.Sprite):
 
         self.position += move_amount
 
-        #helper.rect_clamp_point_ip(self.movement_bounds, self.position)
+        helper.rect_clamp_point_ip(self.movement_bounds, self.position)
 
         self.rect.centerx = self.position.x
         self.rect.centery = self.position.y
 
-        #self.rect.clamp_ip(self.movement_bounds)
-        #print("Position = ", self.position)
+        self.rect.clamp_ip(self.movement_bounds)
 
     def move(self, direction=MovementDirection.STOP):
-        self.velocity = direction.value
+        self.velocity = direction.value * self.speed
 
     def get_position(self):
         return self.position

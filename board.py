@@ -21,6 +21,8 @@ class Board:
     BALL_RADIUS = 10
     BALL_SPEED = 400.0
 
+    PADDLE_SPEED = 200.0
+
     IN_PROGRESS = 0
     LEFT_PLAYER = 1
     RIGHT_PLAYER = 2
@@ -53,7 +55,7 @@ class Board:
         self._right_player = right_player_generator(input, right_center, right_top, right_bottom)
 
     def update(self, elapsed):
-        self._ball.update(elapsed, self._paddles) 
+        self._ball.update(elapsed, self._paddles)
         self._paddles.update(elapsed)
 
         self._left_player.update(elapsed, self._ball)
@@ -129,7 +131,7 @@ class Board:
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)
 
-        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds, speed=100)
+        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds, speed=Board.PADDLE_SPEED)
 
         return paddle
 
