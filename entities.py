@@ -27,11 +27,30 @@ class Ball(pygame.sprite.Sprite):
 
         self.rect = pygame.Rect(200, 200, radius * 2, radius * 2)
 
-    def update(self, elapsed_seconds):
+    def update(self, elapsed_seconds, paddles):
         delta_position = self.velocity * elapsed_seconds
 
-        next_position = self.position + delta_position
-        intersections = helper.line_line_intersection(self.position, next_position, pygame.Vector2(600, 0), pygame.Vector2(600, 600))
+        #next_position = self.position + delta_position
+        #intersections = helper.line_line_intersection(self.position, next_position, pygame.Vector2(600, 0), pygame.Vector2(600, 600))
+
+        next_rect = self.rect.copy()
+        next_rect.center = self.position + delta_position
+
+        for paddle in paddles:
+            if next_rect.colliderect(paddle.rect):
+                is_vertical = True if paddle.rect.height > paddle.rect.width else False
+
+                if is_vertical:
+                    self.velocity.x = -self.velocity.x
+                else:
+                    self.velocity.y = -self.velocity.y
+
+                break
+
+        self.position += delta_position
+        self.rect = next_rect
+
+        #print("width: {0}".format(paddle.get_dimensions().width))
 
         # if len(intersections) > 0:
         #     num = len(intersections)
@@ -40,9 +59,6 @@ class Ball(pygame.sprite.Sprite):
         #     for i in intersections:
         #         print("intersection: {}".format(i))
         # else:
-
-
-        self.position = next_position
 
         self.rect.center = self.position
 
@@ -87,41 +103,52 @@ class MovementDirection(Enum):
 
 
 class Paddle(pygame.sprite.Sprite):
-    def __init__(self, size, speed, bounds, color=(255, 242, 0)):
+    def __init__(self, paddle_bounds, movement_bounds, speed):
         super().__init__()
-
-        self.speed = speed
-        self.size = size
-        self.bounds = bounds.copy()
         self.velocity = pygame.Vector2()
         self.position = pygame.Vector2()
+        self.speed = speed
 
-        self.image = pygame.Surface(size)
-        self.rect = pygame.Rect(0, 0, size[0], size[1])
+        self.paddle_bounds = paddle_bounds.copy()
+        self.movement_bounds = movement_bounds.copy()
 
-        self.position.x = self.bounds.centerx
-        self.position.y = self.bounds.centery
+        self.movement_bounds.width -= paddle_bounds.width
+        self.movement_bounds.height -= paddle_bounds.height
 
-        self.image.fill(color)
+        self.movement_bounds.width = self.movement_bounds.width if self.movement_bounds.width > 0 else 1
+        self.movement_bounds.height = self.movement_bounds.height if self.movement_bounds.height > 0 else 1
+
+        self.movement_bounds.left += paddle_bounds.width * 0.5
+        self.movement_bounds.top += paddle_bounds.height * 0.5
+
+        self.image = pygame.Surface((paddle_bounds.width, paddle_bounds.height))
+        self.image.fill(pygame.Color('#FF0000'))
         self.image = self.image.convert()
 
+        self.rect = paddle_bounds.copy()
+        self.position.x = self.movement_bounds.centerx
+        self.position.y = self.movement_bounds.centery
+
     def update(self, elapsed):
-        move_amount = self.velocity * self.speed * elapsed
+        move_amount = self.velocity * elapsed
 
         self.position += move_amount
 
-        helper.rect_clamp_point_ip(self.bounds, self.position)
+        helper.rect_clamp_point_ip(self.movement_bounds, self.position)
 
         self.rect.centerx = self.position.x
         self.rect.centery = self.position.y
 
-        self.rect.clamp_ip(self.bounds)
+        self.rect.clamp_ip(self.movement_bounds)
 
     def move(self, direction=MovementDirection.STOP):
         self.velocity = direction.value
 
     def get_position(self):
         return self.position
+
+    def get_dimensions(self):
+        return helper.Dimensions(self.rect.width, self.rect.height)
 
 
 class Net(pygame.sprite.Sprite):
