@@ -27,36 +27,52 @@ class Ball(pygame.sprite.Sprite):
 
         self.rect = pygame.Rect(200, 200, radius * 2, radius * 2)
 
-    def update(self, paddles, elapsed_seconds):
+    def update(self, elapsed_seconds):
         delta_position = self.velocity * elapsed_seconds
 
-        # attempt to move in x direction
-        next_rect = pygame.Rect(self.position.x - self.radius, self.position.y - self.radius, self.radius * 2, self.radius * 2)
-        next_rect.centerx += delta_position.x
+        next_position = self.position + delta_position
+        intersections = helper.line_line_intersection(self.position, next_position, pygame.Vector2(600, 0), pygame.Vector2(600, 600))
 
-        for paddle in paddles:
-            if next_rect.colliderect(paddle.rect):
-                delta_position.x = 0
-                self.velocity.x *= -1
-                next_rect = self.rect
-                break
+        # if len(intersections) > 0:
+        #     num = len(intersections)
+        #
+        #     print("intersection!")
+        #     for i in intersections:
+        #         print("intersection: {}".format(i))
+        # else:
 
-        self.rect = next_rect  # accept delta x change
-        self.position.x += delta_position.x
 
-        # attempt to move in y direction
-        next_rect = next_rect.copy()
-        next_rect.centery += delta_position.y
+        self.position = next_position
 
-        for paddle in paddles:
-            if next_rect.colliderect(paddle.rect):
-                delta_position.y = 0
-                self.velocity.y *= -1
-                next_rect = self.rect
-                break
+        self.rect.center = self.position
 
-        self.rect = next_rect
-        self.position.y += delta_position.y
+        # # attempt to move in x direction
+        # next_rect = pygame.Rect(self.position.x - self.radius, self.position.y - self.radius, self.radius * 2, self.radius * 2)
+        # next_rect.centerx += delta_position.x
+        #
+        # for paddle in paddles:
+        #     if next_rect.colliderect(paddle.rect):
+        #         delta_position.x = 0
+        #         self.velocity.x *= -1
+        #         next_rect = self.rect
+        #         break
+        #
+        # self.rect = next_rect  # accept delta x change
+        # self.position.x += delta_position.x
+        #
+        # # attempt to move in y direction
+        # next_rect = next_rect.copy()
+        # next_rect.centery += delta_position.y
+        #
+        # for paddle in paddles:
+        #     if next_rect.colliderect(paddle.rect):
+        #         delta_position.y = 0
+        #         self.velocity.y *= -1
+        #         next_rect = self.rect
+        #         break
+        #
+        # self.rect = next_rect
+        # self.position.y += delta_position.y
 
     def get_position(self):
         return self.position
@@ -127,7 +143,7 @@ class Net(pygame.sprite.Sprite):
 
         # calculate offset such that the first and last dash will have the
         # same amount of space between their edge and the edge of the board
-        num_dashes = self.image.get_height() / (dash_length * 2);
+        num_dashes = self.image.get_height() / (dash_length * 2)
         offset = int((num_dashes - math.floor(num_dashes)) * dash_length)
 
         for y in range(offset, self.image.get_height() + dash_length + offset, dash_length * 2):
@@ -155,3 +171,4 @@ class TextSprite(pygame.sprite.Sprite):
     def set_position(self, position):
         self.rect.left = position.x
         self.rect.top = position.y
+

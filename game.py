@@ -7,7 +7,8 @@ import controllers
 from helper import *
 from board import Board
 import collections
-#import random
+
+# import random
 
 window_size = Dimensions(800, 400)
 bkg_color = (0, 0, 0)
@@ -25,9 +26,15 @@ input = Input()
 board_bounds = pygame.Rect(0, 0, window_size.width, window_size.height)
 
 
+def create_computer_player():
+    return controllers.DefaultPlayer()
+
+
 class GameState:
     def __init__(self):
-        self.board = Board(size=window_size)
+        self.board = Board(size=window_size,
+                           left_player_generator=create_computer_player,
+                           right_player_generator=create_computer_player)
 
     @classmethod
     def create(cls):
@@ -37,7 +44,7 @@ class GameState:
         return None
 
     def is_finished(self):
-        return False
+        return self.board.get_status() != Board.IN_PROGRESS
 
     def update(self, elapsed):
         self.board.update(elapsed)
@@ -119,12 +126,12 @@ while not input.quit and not state.is_finished():
     # decoration.update(elapsed_time)
 
     # render all sprites
-    #screen.fill(bkg_color)
+    # screen.fill(bkg_color)
     # decoration.draw(screen)
     # paddles.draw(screen)
     # balls.draw(screen)
     # scores.draw(screen)
-    #pygame.display.flip()
+    # pygame.display.flip()
 
     # limit FPS to 60, but otherwise execute as quickly as possible
     elapsed_time = clock.tick_busy_loop(60) / 1000.0

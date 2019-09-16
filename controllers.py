@@ -3,6 +3,14 @@ import input
 from entities import MovementDirection
 
 
+class DefaultPlayer:
+    def __init__(self):
+        pass
+
+    def update(self, elapsed):
+        pass
+
+
 class PlayerController:
     def __init__(self, input, vertical_paddle, horizontal_paddles):
         self.input = input
