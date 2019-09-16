@@ -1,23 +1,23 @@
 from entities import *
-import input
+from input import *
 from entities import MovementDirection
 
 
 class DefaultPlayer:
-    def __init__(self):
-        pass
-
-    def update(self, elapsed):
-        pass
-
-
-class PlayerController:
-    def __init__(self, input, vertical_paddle, horizontal_paddles):
+    def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
         self.input = input
         self.vertical = vertical_paddle
-        self.horizontal_paddles = horizontal_paddles
+        self.horizontal_paddles = [top_paddle, bottom_paddle]
 
-    def update(self):
+    def update(self, elapsed, ball):
+        pass
+
+
+class PlayerController(DefaultPlayer):
+    def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
+        super().__init__(input, vertical_paddle, top_paddle, bottom_paddle)
+
+    def update(self, elapsed, ball):
         move_dir = MovementDirection.STOP
 
         if self.input.left and not self.input.right:
@@ -47,10 +47,10 @@ class PlayerController:
 DEAD_ZONE_MULTIPLIER = 0.05
 
 
-class ComputerController:
-    def __init__(self, vertical_paddle, horizontal_paddles):
-        self.vertical = vertical_paddle
-        self.horizontal_paddles = horizontal_paddles
+class ComputerController(DefaultPlayer):
+    def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
+        super().__init__(input, vertical_paddle, top_paddle, bottom_paddle)
+
         self.dead_zone_x = self.vertical.rect.width * DEAD_ZONE_MULTIPLIER
         self.dead_zone_y = self.horizontal_paddles[0].rect.height * DEAD_ZONE_MULTIPLIER
 
@@ -62,7 +62,7 @@ class ComputerController:
         delta = coord1 - coord2
         return delta ** 2
 
-    def update(self, ball):
+    def update(self, elapsed, ball):
         vertical_pos = self.vertical.get_position().y
         ball_pos = ball.get_position()
 

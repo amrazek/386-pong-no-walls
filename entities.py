@@ -49,46 +49,7 @@ class Ball(pygame.sprite.Sprite):
 
         self.position += delta_position
         self.rect = next_rect
-
-        #print("width: {0}".format(paddle.get_dimensions().width))
-
-        # if len(intersections) > 0:
-        #     num = len(intersections)
-        #
-        #     print("intersection!")
-        #     for i in intersections:
-        #         print("intersection: {}".format(i))
-        # else:
-
         self.rect.center = self.position
-
-        # # attempt to move in x direction
-        # next_rect = pygame.Rect(self.position.x - self.radius, self.position.y - self.radius, self.radius * 2, self.radius * 2)
-        # next_rect.centerx += delta_position.x
-        #
-        # for paddle in paddles:
-        #     if next_rect.colliderect(paddle.rect):
-        #         delta_position.x = 0
-        #         self.velocity.x *= -1
-        #         next_rect = self.rect
-        #         break
-        #
-        # self.rect = next_rect  # accept delta x change
-        # self.position.x += delta_position.x
-        #
-        # # attempt to move in y direction
-        # next_rect = next_rect.copy()
-        # next_rect.centery += delta_position.y
-        #
-        # for paddle in paddles:
-        #     if next_rect.colliderect(paddle.rect):
-        #         delta_position.y = 0
-        #         self.velocity.y *= -1
-        #         next_rect = self.rect
-        #         break
-        #
-        # self.rect = next_rect
-        # self.position.y += delta_position.y
 
     def get_position(self):
         return self.position
@@ -134,12 +95,13 @@ class Paddle(pygame.sprite.Sprite):
 
         self.position += move_amount
 
-        helper.rect_clamp_point_ip(self.movement_bounds, self.position)
+        #helper.rect_clamp_point_ip(self.movement_bounds, self.position)
 
         self.rect.centerx = self.position.x
         self.rect.centery = self.position.y
 
-        self.rect.clamp_ip(self.movement_bounds)
+        #self.rect.clamp_ip(self.movement_bounds)
+        #print("Position = ", self.position)
 
     def move(self, direction=MovementDirection.STOP):
         self.velocity = direction.value

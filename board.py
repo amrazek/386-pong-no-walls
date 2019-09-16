@@ -25,7 +25,7 @@ class Board:
     LEFT_PLAYER = 1
     RIGHT_PLAYER = 2
 
-    def __init__(self, size, left_player_generator, right_player_generator):
+    def __init__(self, input, size, left_player_generator, right_player_generator):
         assert size.width > 0 and size.height > 0
 
         self._bounds = pygame.Rect(0, 0, size.width, size.height)
@@ -33,7 +33,8 @@ class Board:
 
         net = Board._create_net(self._bounds)
 
-        self._ball = Board._create_ball(self._bounds, initial_pos=self._bounds.center, initial_velocity=Board._create_initial_velocity())
+        self._ball = Board._create_ball(self._bounds, initial_pos=self._bounds.center,
+                                        initial_velocity=Board._create_initial_velocity())
 
         left_center = self._create_paddle(10, 100, type=PaddleType.VERTICAL)
         left_top = self._create_paddle(100, 10, type=PaddleType.TOP)
@@ -43,21 +44,20 @@ class Board:
         right_top = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, type=PaddleType.TOP)
         right_bottom = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, type=PaddleType.BOTTOM)
 
-        self._paddles = pygame.sprite.Group(left_center, left_top, left_bottom, \
-                                            right_center, right_top, right_bottom)
+        self._paddles = pygame.sprite.Group(left_center, left_top, left_bottom, right_center, right_top, right_bottom)
         self._passives = pygame.sprite.Group(net)
 
         self._status = Board.IN_PROGRESS
 
-        self._left_player = left_player_generator()
-        self._right_player = right_player_generator()
+        self._left_player = left_player_generator(input, left_center, left_top, left_bottom)
+        self._right_player = right_player_generator(input, right_center, right_top, right_bottom)
 
     def update(self, elapsed):
-        self._ball.update(elapsed, self._paddles)  # todo: ball needs paddles, elapsed time to update
+        self._ball.update(elapsed, self._paddles) 
         self._paddles.update(elapsed)
 
-        self._left_player.update(elapsed)
-        self._right_player.update(elapsed)
+        self._left_player.update(elapsed, self._ball)
+        self._right_player.update(elapsed, self._ball)
 
         # if the ball isn't anywhere on the field, it's out of bounds
         if not self._ball.rect.colliderect(self._bounds):
@@ -129,21 +129,19 @@ class Board:
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)
 
-        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds,speed=100)
+        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds, speed=100)
 
         return paddle
-
 
     @classmethod
     def _create_initial_velocity(cls):
         # determine a 60 degree arc
-        # arc_angle = random.uniform(0, 60.0 * 3.14159 / 180.0)
-        #
-        # # determine which player heading will receive ball initially
-        # x_velocity_multiplayer = [-1.0, 1.0][random.randint(0, 1)]
-        #
-        # velocity = pygame.Vector2(math.cos(arc_angle - 30), math.sin(arc_angle - 30))
-        # velocity.x *= x_velocity_multiplayer
-        #
-        # return velocity * Board.BALL_SPEED
-        return pygame.Vector2(1.0, 0.0) * Board.BALL_SPEED
+        arc_angle = random.uniform(0, 60.0 * 3.14159 / 180.0)
+
+        # determine which player heading will receive ball initially
+        x_velocity_multiplayer = [-1.0, 1.0][random.randint(0, 1)]
+
+        velocity = pygame.Vector2(math.cos(arc_angle - 3.14159 / 6.0), math.sin(arc_angle - 3.14159 / 6.0))
+        velocity.x *= x_velocity_multiplayer
+
+        return velocity * Board.BALL_SPEED
