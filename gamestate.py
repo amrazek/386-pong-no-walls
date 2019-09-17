@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 import config
 from board import Board
-import controllers
+import players
 import entities
 
 
@@ -69,8 +69,8 @@ class PlayGame(GameState):
         self.board = Board(input_state=input_state,
                            state=self,
                            size=config.WINDOW_SIZE,
-                           left_player_generator=controllers.ComputerController,
-                           right_player_generator=controllers.ComputerController)
+                           left_player_generator=players.ComputerPlayer,
+                           right_player_generator=players.ComputerPlayer)
 
     def next_state(self):
         pass

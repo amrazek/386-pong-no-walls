@@ -14,7 +14,7 @@ class Player:
         return "DefaultPlayer"
 
 
-class PlayerController(Player):
+class HumanPlayer(Player):
     def __init__(self, input_state, vertical_paddle, top_paddle, bottom_paddle):
         super().__init__(input_state, vertical_paddle, top_paddle, bottom_paddle)
 
@@ -44,7 +44,7 @@ class PlayerController(Player):
         return "Player"
 
 
-class ComputerController(Player):
+class ComputerPlayer(Player):
     def __init__(self, input_state, vertical_paddle, top_paddle, bottom_paddle):
         super().__init__(input_state, vertical_paddle, top_paddle, bottom_paddle)
 
