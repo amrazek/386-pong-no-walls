@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import math
 import helper
+import config
 
 
 class Ball(pygame.sprite.Sprite):
@@ -82,9 +83,11 @@ class Paddle(pygame.sprite.Sprite):
         self.movement_bounds.left += paddle_bounds.width * 0.5
         self.movement_bounds.top += paddle_bounds.height * 0.5
 
-        self.image = pygame.Surface((paddle_bounds.width, paddle_bounds.height))
-        self.image.fill(pygame.Color('#FF0000'))
-        self.image = self.image.convert()
+        paddle_image = config.HORIZONTAL_PADDLE_SURFACE if paddle_bounds.width > paddle_bounds.height else config.VERTICAL_PADDLE_SURFACE
+
+        self.image = paddle_image.copy()  # pygame.Surface((paddle_bounds.width, paddle_bounds.height))
+        #self.image.fill(pygame.Color('#FF0000'))
+        #self.image = self.image.convert()
 
         self.rect = paddle_bounds.copy()
         self.position.x = self.movement_bounds.centerx
