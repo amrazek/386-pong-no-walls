@@ -1,5 +1,4 @@
 import pygame
-import collections
 import entities
 import math
 import random
@@ -39,8 +38,7 @@ class Board:
 
         net = Board._create_net(self._bounds)
 
-        self._ball = Board._create_ball(self._bounds, initial_pos=self._bounds.center,
-                                        initial_velocity=Board._create_initial_velocity())
+        self._ball = Board._create_ball(self._bounds, initial_velocity=Board._create_initial_velocity())
 
         left_center = self._create_paddle(paddle_type=PaddleType.VERTICAL)
         left_top = self._create_paddle(paddle_type=PaddleType.TOP)
@@ -55,13 +53,16 @@ class Board:
 
         self._status = Board.IN_PROGRESS
 
-        left_score = self._create_text(pygame.Vector2(left_top.rect.centerx, left_top.rect.top), str(state.points[0]))
-        right_score = self._create_text(pygame.Vector2(right_top.rect.centerx, right_top.rect.top), str(state.points[1]))
-
-        self._scores = pygame.sprite.Group(left_score, right_score)
-
         self._left_player = left_player_generator(input, left_center, left_top, left_bottom)
         self._right_player = right_player_generator(input, right_center, right_top, right_bottom)
+
+        left_score_pos = pygame.Vector2(left_top.rect.centerx, left_top.rect.bottom)
+        right_score_pos = pygame.Vector2(right_top.rect.centerx, right_top.rect.bottom)
+
+        left_score = self._create_text(left_score_pos, self._left_player.get_name() + ": " + str(state.points[0]))
+        right_score = self._create_text(right_score_pos, self._right_player.get_name() + ": " + str(state.points[1]))
+
+        self._passives.add(left_score, right_score)
 
     def update(self, elapsed):
         self._ball.update(elapsed, self._paddles)
@@ -98,7 +99,7 @@ class Board:
         return net
 
     @classmethod
-    def _create_ball(cls, bounds, initial_pos, initial_velocity):
+    def _create_ball(cls, bounds, initial_velocity):
         ball = entities.Ball(
             ball_color=Board.BALL_COLOR,
             radius=Board.BALL_RADIUS,
@@ -150,8 +151,6 @@ class Board:
                 # the vertical paddle
                 movement_bounds.width -= Board.PADDLE_THICKNESS
 
-
-
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)
 
@@ -165,16 +164,22 @@ class Board:
         arc_angle = random.uniform(0, 60.0 * 3.14159 / 180.0)
 
         # determine which player heading will receive ball initially
-        x_velocity_multiplayer = [-1.0, 1.0][random.randint(0, 1)]
+        x_velocity_multiplier = [-1.0, 1.0][random.randint(0, 1)]
 
         velocity = pygame.Vector2(math.cos(arc_angle - 3.14159 / 6.0), math.sin(arc_angle - 3.14159 / 6.0))
-        velocity.x *= x_velocity_multiplayer
+        velocity.x *= x_velocity_multiplier
 
         return velocity * Board.BALL_SPEED
 
     @classmethod
     def _create_text(cls, position, text=""):
         sprite = entities.TextSprite(text, color=Board.SCORE_COLOR)
+
+        # calculate corrected position such that the text is centered
+        # at given position
+        position.x -= sprite.rect.width * 0.5
+        position.y -= sprite.rect.height * 0.5
+
         sprite.set_position(position)
 
         return sprite

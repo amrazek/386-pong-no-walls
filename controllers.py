@@ -12,6 +12,9 @@ class DefaultPlayer:
     def update(self, elapsed, ball):
         self.vertical.move(MovementDirection.UP)
 
+    def get_name(self):
+        return "DefaultPlayer"
+
 
 class PlayerController(DefaultPlayer):
     def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
@@ -40,6 +43,9 @@ class PlayerController(DefaultPlayer):
             move_dir = MovementDirection.STOP
 
         self.vertical.move(move_dir)
+
+    def get_name(self):
+        return "Player"
 
 
 # if target coordinate is within this fraction of a paddle's size from its
@@ -89,3 +95,6 @@ class ComputerController(DefaultPlayer):
 
         for h in self.horizontal_paddles:
             h.move(direction)
+
+    def get_name(self):
+        return "Computer"

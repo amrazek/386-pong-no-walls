@@ -89,6 +89,7 @@ class Paddle(pygame.sprite.Sprite):
         self.rect = paddle_bounds.copy()
         self.position.x = self.movement_bounds.centerx
         self.position.y = self.movement_bounds.centery
+        self.update(0.0)
 
     def update(self, elapsed):
         move_amount = self.velocity * elapsed
@@ -141,7 +142,7 @@ class Net(pygame.sprite.Sprite):
 
 
 class TextSprite(pygame.sprite.Sprite):
-    def __init__(self, text="", font="consolas", size=16, color=(255,255,255)):
+    def __init__(self, text="", font="consolas", size=16, color=(255, 255, 255)):
         super().__init__()
         self.text = text
         self.font = pygame.sysfont.SysFont(font, size)
@@ -157,4 +158,3 @@ class TextSprite(pygame.sprite.Sprite):
     def set_position(self, position):
         self.rect.left = position.x
         self.rect.top = position.y
-
