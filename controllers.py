@@ -1,67 +1,52 @@
-from entities import *
-from input import *
 from entities import MovementDirection
 
 
-class DefaultPlayer:
-    def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
-        self.input = input
-        self.vertical = vertical_paddle
-        self.horizontal_paddles = [top_paddle, bottom_paddle]
+class Player:
+    def __init__(self, input_state, vertical_paddle, top_paddle, bottom_paddle):
+        self._input_state = input_state
+        self._vertical = vertical_paddle
+        self._horizontal_paddles = [top_paddle, bottom_paddle]
 
     def update(self, elapsed, ball):
-        self.vertical.move(MovementDirection.UP)
+        pass
 
     def get_name(self):
         return "DefaultPlayer"
 
 
-class PlayerController(DefaultPlayer):
-    def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
-        super().__init__(input, vertical_paddle, top_paddle, bottom_paddle)
+class PlayerController(Player):
+    def __init__(self, input_state, vertical_paddle, top_paddle, bottom_paddle):
+        super().__init__(input_state, vertical_paddle, top_paddle, bottom_paddle)
 
     def update(self, elapsed, ball):
         move_dir = MovementDirection.STOP
 
-        if self.input.left and not self.input.right:
+        if self._input_state.left and not self._input_state.right:
             move_dir = MovementDirection.LEFT
-        elif self.input.right and not self.input.left:
+        elif self._input_state.right and not self._input_state.left:
             move_dir = MovementDirection.RIGHT
         else:
             move_dir = MovementDirection.STOP
 
-        for p in self.horizontal_paddles:
+        for p in self._horizontal_paddles:
             p.move(move_dir)
 
-        move_dir = MovementDirection.STOP
-
-        if self.input.up and not self.input.down:
+        if self._input_state.up and not self._input_state.down:
             move_dir = MovementDirection.UP
-        elif self.input.down and not self.input.up:
+        elif self._input_state.down and not self._input_state.up:
             move_dir = MovementDirection.DOWN
         else:
             move_dir = MovementDirection.STOP
 
-        self.vertical.move(move_dir)
+        self._vertical.move(move_dir)
 
     def get_name(self):
         return "Player"
 
 
-# if target coordinate is within this fraction of a paddle's size from its
-# center, don't move the paddle
-DEAD_ZONE_MULTIPLIER = 0.05
-
-
-class ComputerController(DefaultPlayer):
-    def __init__(self, input, vertical_paddle, top_paddle, bottom_paddle):
-        super().__init__(input, vertical_paddle, top_paddle, bottom_paddle)
-
-        self.dead_zone_x = self.vertical.rect.width * DEAD_ZONE_MULTIPLIER
-        self.dead_zone_y = self.horizontal_paddles[0].rect.height * DEAD_ZONE_MULTIPLIER
-
-        self.dead_zone_x **= 2
-        self.dead_zone_y **= 2
+class ComputerController(Player):
+    def __init__(self, input_state, vertical_paddle, top_paddle, bottom_paddle):
+        super().__init__(input_state, vertical_paddle, top_paddle, bottom_paddle)
 
     @classmethod
     def _dist_squared(cls, coord1, coord2):
@@ -69,31 +54,25 @@ class ComputerController(DefaultPlayer):
         return delta * delta
 
     def update(self, elapsed, ball):
-        vertical_pos = self.vertical.get_position().y
+        vertical_pos = self._vertical.get_position().y
         ball_pos = ball.get_position()
 
         # handle center paddle
         # decide which direction to move it (or if it should not be moved at all)
-        in_dead_zone = ComputerController._dist_squared(vertical_pos, ball_pos.y) < self.dead_zone_y
-
-        if ball_pos.y < vertical_pos and not in_dead_zone:
-            self.vertical.move(MovementDirection.UP)
-        elif ball_pos.y > vertical_pos and not in_dead_zone:
-            self.vertical.move(MovementDirection.DOWN)
+        if ball_pos.y < vertical_pos:
+            self._vertical.move(MovementDirection.UP)
+        elif ball_pos.y > vertical_pos:
+            self._vertical.move(MovementDirection.DOWN)
         else:
-            self.vertical.move(MovementDirection.STOP)
+            self._vertical.move(MovementDirection.STOP)
 
         # handle horizontal paddles
-        in_dead_zone = ComputerController._dist_squared(self.horizontal_paddles[0].get_position().x, ball_pos.x) < self.dead_zone_x
-
-        if self.horizontal_paddles[0].get_position().x > ball.get_position().x:
+        if self._horizontal_paddles[0].get_position().x > ball.get_position().x:
             direction = MovementDirection.LEFT
         else:
             direction = MovementDirection.RIGHT
 
-        direction = direction if not in_dead_zone else MovementDirection.STOP
-
-        for h in self.horizontal_paddles:
+        for h in self._horizontal_paddles:
             h.move(direction)
 
     def get_name(self):

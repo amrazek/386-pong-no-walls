@@ -30,7 +30,7 @@ class Board:
     LEFT_PLAYER = 1
     RIGHT_PLAYER = 2
 
-    def __init__(self, input, state, size, left_player_generator, right_player_generator):
+    def __init__(self, input_state, state, size, left_player_generator, right_player_generator):
         assert size.width > 0 and size.height > 0
 
         self._bounds = pygame.Rect(0, 0, size.width, size.height)
@@ -53,8 +53,8 @@ class Board:
 
         self._status = Board.IN_PROGRESS
 
-        self._left_player = left_player_generator(input, left_center, left_top, left_bottom)
-        self._right_player = right_player_generator(input, right_center, right_top, right_bottom)
+        self._left_player = left_player_generator(input_state, left_center, left_top, left_bottom)
+        self._right_player = right_player_generator(input_state, right_center, right_top, right_bottom)
 
         left_score_pos = pygame.Vector2(left_top.rect.centerx, left_top.rect.bottom)
         right_score_pos = pygame.Vector2(right_top.rect.centerx, right_top.rect.bottom)
