@@ -19,8 +19,11 @@ class Board:
     NET_DASH_LENGTH = 30
     NET_WIDTH = 2
 
+    PADDLE_LENGTH = 100
+    PADDLE_THICKNESS = 10
+
     BALL_RADIUS = 10
-    BALL_SPEED = 400.0
+    BALL_SPEED = 100.0
 
     PADDLE_SPEED = 400.0
 
@@ -39,13 +42,13 @@ class Board:
         self._ball = Board._create_ball(self._bounds, initial_pos=self._bounds.center,
                                         initial_velocity=Board._create_initial_velocity())
 
-        left_center = self._create_paddle(10, 100, paddle_type=PaddleType.VERTICAL)
-        left_top = self._create_paddle(100, 10, paddle_type=PaddleType.TOP)
-        left_bottom = self._create_paddle(100, 10, paddle_type=PaddleType.BOTTOM)
+        left_center = self._create_paddle(paddle_type=PaddleType.VERTICAL)
+        left_top = self._create_paddle(paddle_type=PaddleType.TOP)
+        left_bottom = self._create_paddle(paddle_type=PaddleType.BOTTOM)
 
-        right_center = self._create_paddle(10, 100, player=Board.RIGHT_PLAYER)
-        right_top = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, paddle_type=PaddleType.TOP)
-        right_bottom = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, paddle_type=PaddleType.BOTTOM)
+        right_center = self._create_paddle(player=Board.RIGHT_PLAYER)
+        right_top = self._create_paddle(player=Board.RIGHT_PLAYER, paddle_type=PaddleType.TOP)
+        right_bottom = self._create_paddle(player=Board.RIGHT_PLAYER, paddle_type=PaddleType.BOTTOM)
 
         self._paddles = pygame.sprite.Group(left_center, left_top, left_bottom, right_center, right_top, right_bottom)
         self._passives = pygame.sprite.Group(net)
@@ -104,8 +107,11 @@ class Board:
 
         return ball
 
-    def _create_paddle(self, width, height, player=LEFT_PLAYER, paddle_type=PaddleType.VERTICAL):
+    def _create_paddle(self, player=LEFT_PLAYER, paddle_type=PaddleType.VERTICAL):
         is_vertical = paddle_type == PaddleType.VERTICAL
+
+        width = Board.PADDLE_THICKNESS if is_vertical else Board.PADDLE_LENGTH
+        height = Board.PADDLE_THICKNESS if not is_vertical else Board.PADDLE_LENGTH
 
         # define movement area
         movement_bounds = pygame.Rect(0, 0, self._bounds.width, self._bounds.height)
@@ -119,7 +125,12 @@ class Board:
                 movement_bounds.width = self._bounds.width * 0.5  # can only move on its half of board
 
                 if paddle_type == PaddleType.BOTTOM:
-                    movement_bounds.top = self._bounds.height - height * 0.5
+                    movement_bounds.top = self._bounds.height - height
+
+                # also, do not let the paddle move so far to the left that it intersects
+                # the vertical paddle
+                movement_bounds.width -= Board.PADDLE_THICKNESS
+                movement_bounds.left += Board.PADDLE_THICKNESS
 
         else:  # right player
             # everything must be on right-hand side, so start by moving the whole rect
@@ -134,6 +145,12 @@ class Board:
 
                 if paddle_type == PaddleType.BOTTOM:  # adjust paddle so it lies at bottom of screen
                     movement_bounds.top = self._bounds.height - height
+
+                # also, do not let the paddle move so far to the left that it intersects
+                # the vertical paddle
+                movement_bounds.width -= Board.PADDLE_THICKNESS
+
+
 
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)

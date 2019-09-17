@@ -32,7 +32,7 @@ class GameState:
         self.board = Board(input=input,
                            state=self,
                            size=window_size,
-                           left_player_generator=controllers.DefaultPlayer,
+                           left_player_generator=controllers.ComputerController,
                            right_player_generator=controllers.ComputerController)
 
     @classmethod
