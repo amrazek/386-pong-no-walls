@@ -23,20 +23,31 @@ DURATION_PER_MESSAGE = 0.5  # in seconds
 
 VERTICAL_PADDLE_SURFACE = None
 HORIZONTAL_PADDLE_SURFACE = None
+BALL_SURFACE = None
 
 
 def load_images():
-    base_image = pygame.image.load("images/paddle.png")
+    base_paddle_image = pygame.image.load("images/paddle.png")
+    base_ball_image = pygame.image.load("images/ball.png")
 
     # construct vertical and horizontal paddles using appropriate dimensions and
     # this base image
 
     # first construct a horizontal paddle
     global HORIZONTAL_PADDLE_SURFACE
-    HORIZONTAL_PADDLE_SURFACE = pygame.transform.smoothscale(base_image, (PADDLE_LENGTH, PADDLE_THICKNESS))
+    HORIZONTAL_PADDLE_SURFACE = pygame.transform.smoothscale(base_paddle_image, (PADDLE_LENGTH, PADDLE_THICKNESS))
     HORIZONTAL_PADDLE_SURFACE = HORIZONTAL_PADDLE_SURFACE.convert()
 
     # now vertical paddle, with dimensions flipped
     global VERTICAL_PADDLE_SURFACE
-    VERTICAL_PADDLE_SURFACE = pygame.transform.smoothscale(base_image, (PADDLE_THICKNESS, PADDLE_LENGTH))
+    VERTICAL_PADDLE_SURFACE = pygame.transform.smoothscale(base_paddle_image, (PADDLE_THICKNESS, PADDLE_LENGTH))
     VERTICAL_PADDLE_SURFACE = VERTICAL_PADDLE_SURFACE.convert()
+
+    # generate ball surface
+    # note that it needs a color key (if it does not have an alpha channel)
+    global BALL_SURFACE
+    BALL_SURFACE = pygame.transform.smoothscale(base_ball_image, (BALL_RADIUS * 2, BALL_RADIUS * 2))
+    BALL_SURFACE = BALL_SURFACE.convert_alpha()
+
+    mask_color = (0, 0, 0)
+    BALL_SURFACE.set_colorkey(mask_color)

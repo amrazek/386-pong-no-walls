@@ -14,16 +14,7 @@ class Ball(pygame.sprite.Sprite):
         self.bounds = bounds
         self.position = pygame.Vector2(self.bounds.centerx, self.bounds.centery)
 
-        # this will be an image later, so might as well save some time and
-        # make it a surface to begin with
-        self.image = pygame.Surface((radius * 2, radius * 2), HWSURFACE)
-        self.image = self.image.convert()
-
-        mask_color = (0, 0, 0)
-        self.image.set_colorkey(mask_color)
-        self.image.fill(mask_color)
-
-        pygame.draw.circle(self.image, ball_color, (radius, radius), radius)
+        self.image = config.BALL_SURFACE
 
         self.rect = pygame.Rect(0, 0, radius * 2, radius * 2)
         self.rect.center = self.position
@@ -83,13 +74,11 @@ class Paddle(pygame.sprite.Sprite):
         self.movement_bounds.left += paddle_bounds.width * 0.5
         self.movement_bounds.top += paddle_bounds.height * 0.5
 
-        paddle_image = config.HORIZONTAL_PADDLE_SURFACE if paddle_bounds.width > paddle_bounds.height else config.VERTICAL_PADDLE_SURFACE
-
-        self.image = paddle_image.copy()  # pygame.Surface((paddle_bounds.width, paddle_bounds.height))
-        #self.image.fill(pygame.Color('#FF0000'))
-        #self.image = self.image.convert()
+        self.image = config.HORIZONTAL_PADDLE_SURFACE \
+            if paddle_bounds.width > paddle_bounds.height else config.VERTICAL_PADDLE_SURFACE
 
         self.rect = paddle_bounds.copy()
+
         self.position.x = self.movement_bounds.centerx
         self.position.y = self.movement_bounds.centery
         self.update(0.0)  # set up rect to match position
