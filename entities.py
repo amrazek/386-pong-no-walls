@@ -100,8 +100,6 @@ class Paddle(pygame.sprite.Sprite):
         self.rect.centerx = self.position.x
         self.rect.centery = self.position.y
 
-        self.rect.clamp_ip(self.movement_bounds)
-
     def move(self, direction=MovementDirection.STOP):
         self.velocity = direction.value * self.speed
 
