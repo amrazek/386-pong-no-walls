@@ -44,10 +44,16 @@ class Board:
         left_score_pos = pygame.Vector2(left_top.rect.centerx, left_top.rect.bottom)
         right_score_pos = pygame.Vector2(right_top.rect.centerx, right_top.rect.bottom)
 
-        left_score = self._create_text(left_score_pos, self._left_player.get_name() + ": " + str(state.points[0]))
-        right_score = self._create_text(right_score_pos, self._right_player.get_name() + ": " + str(state.points[1]))
+        self._left_score = self._create_text(left_score_pos, self._left_player.get_name() + ": " + str(state.points[0]))
+        self._right_score = self._create_text(right_score_pos, self._right_player.get_name() + ": " + str(state.points[1]))
 
-        self._passives.add(left_score, right_score)
+        # text is centered at given pos, but this means it will overlap the top paddles somewhat
+        delta_pos = pygame.Vector2(0, max(0.5 * self._left_score.rect.height, 0.5 * self._right_score.rect.height))
+
+        self._left_score.set_position(self._left_score.get_position() + delta_pos)
+        self._right_score.set_position(self._right_score.get_position() + delta_pos)
+
+        self._passives = pygame.sprite.Group(self._left_score, self._right_score)
 
     def update(self, elapsed):
         self._ball.update(elapsed, self._paddles)
@@ -59,10 +65,15 @@ class Board:
         # if the ball isn't anywhere on the field, it's out of bounds
         if not self._ball.rect.colliderect(self._bounds):
             # determine which player lost the ball: the other player scores a point
-            if self._ball.get_position().x < self._bounds.left:
-                self._status = Board.LEFT_PLAYER
-            else:
+            if self._ball.get_position().x < self._bounds.centerx:
+                # ball went off of left player's side -> right player wins
                 self._status = Board.RIGHT_PLAYER
+            else:
+                self._status = Board.LEFT_PLAYER
+
+    def update_scores(self, state):
+        self._left_score.set_text(self._left_player.get_name() + ": " + str(state.points[0]))
+        self._right_score.set_text(self._right_player.get_name() + ": " + str(state.points[1]))
 
     def draw(self, screen):
         screen.fill(self._background)

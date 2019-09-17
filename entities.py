@@ -150,3 +150,10 @@ class TextSprite(pygame.sprite.Sprite):
     def set_position(self, position):
         self.rect.left = position.x
         self.rect.top = position.y
+
+    def get_position(self):
+        return pygame.Vector2(self.rect.left, self.rect.top)
+
+    def set_text(self, text):
+        self.text = text
+        self.__update_image()

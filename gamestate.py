@@ -1,3 +1,4 @@
+import math
 import pygame
 from pygame.locals import *
 import config
@@ -37,9 +38,14 @@ class InputState:
 # base state which other "states" (playing a game, menu, victory, etc) derive
 # this hides all the ugly logic and makes for a clean game loop
 class GameState:
-    def __init__(self, input_state):
-        self._left_score, self._right_score = 0, 0
-        self._left_wins, self._right_wins = 0, 0
+    def __init__(self, input_state, previous_state=None):
+        if previous_state is not None:
+            self._left_score, self._right_score = previous_state.points
+            self._left_wins, self._right_wins = previous_state.points
+        else:
+            self._left_score, self._right_score = 0, 0
+            self._left_wins, self._right_wins = 0, 0
+
         self._input_state = input_state
 
     @staticmethod
@@ -60,20 +66,55 @@ class GameState:
     def draw(self, screen):
         raise RuntimeError
 
+    @property
+    def points(self):
+        return self._left_score, self._right_score
 
 # this is actual "in game" play and runs until the ball goes out of bounds
 class PlayGame(GameState):
-    def __init__(self, input_state):
-        super().__init__(input_state)
+    def __init__(self, input_state, previous_state=None):
+        super().__init__(input_state, previous_state)
 
         self.board = Board(input_state=input_state,
                            state=self,
                            size=config.WINDOW_SIZE,
-                           left_player_generator=players.ComputerPlayer,
+                           left_player_generator=players.Player,
                            right_player_generator=players.ComputerPlayer)
 
+    @property
     def next_state(self):
-        pass
+        if not self.finished:
+            raise RuntimeError
+
+        # score will determine next state
+        if self.board.get_status() == Board.LEFT_PLAYER:
+            self._left_score += 1
+        else:
+            self._right_score += 1
+
+        # determine if right threshold is high enough for a player to win a rally
+        if self._left_score >= config.MIN_POINTS_TO_WIN_RALLY or  self._right_score >= config.MIN_POINTS_TO_WIN_RALLY:
+            # to win a rally, one player's score must also be at least
+            # two greater than the other's
+            if math.abs(self._left_score - self._right_score) >= config.MIN_POINT_DIFFERENCE_TO_WIN:
+                # one of the players has one a set
+                winner = Board.LEFT_PLAYER if self._left_score > self._right_score else Board.RIGHT_PLAYER
+
+                if winner == Board.LEFT_PLAYER:
+                    self._left_wins += 1
+                else:
+                    self._right_wins += 1
+
+                self._left_score = self._right_score = 0  # reset for next rally
+
+        # if the set does not have a winner yet, continue
+        if self._left_wins < config.NUMBER_RALLIES_TO_WIN and self._right_wins < config.NUMBER_RALLIES_TO_WIN:
+            # move to next game in the rally
+            next = BeginGame(input_state=self._input_state, previous_state=self)
+
+            return next
+        else:
+            raise NotImplementedError  # TODO: victory screen
 
     @property
     def finished(self):
@@ -85,16 +126,12 @@ class PlayGame(GameState):
     def draw(self, screen):
         self.board.draw(screen)
 
-    @property
-    def points(self):
-        return self._left_score, self._right_score
-
 
 # this state displays a countdown before game begins
 class BeginGame(GameState):
-    def __init__(self, input_state):
-        super().__init__(input_state)
-        self._game = PlayGame(input_state)
+    def __init__(self, input_state, previous_state=None):
+        super().__init__(input_state, previous_state)
+        self._game = PlayGame(input_state, previous_state)
         self._display_time = 0
 
         messages = ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]

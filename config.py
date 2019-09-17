@@ -13,7 +13,7 @@ PADDLE_THICKNESS = 10
 PADDLE_SPEED = 400.0
 
 BALL_RADIUS = 10
-BALL_SPEED = 100.0
+BALL_SPEED = 300.0
 
 NET_DASH_LENGTH = 30
 NET_WIDTH = 2
@@ -25,6 +25,9 @@ VERTICAL_PADDLE_SURFACE = None
 HORIZONTAL_PADDLE_SURFACE = None
 BALL_SURFACE = None
 
+NUMBER_RALLIES_TO_WIN = 3  # player must win this many games in a set for victory
+MIN_POINTS_TO_WIN_RALLY = 11  # player must have at least this many points to win a rally
+MIN_POINT_DIFFERENCE_TO_WIN = 2  # winner must have at least this many more points than loser to win a rally
 
 def load_images():
     base_paddle_image = pygame.image.load("images/paddle.png")
