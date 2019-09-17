@@ -94,14 +94,19 @@ class PlayGame(GameState):
 class BeginGame(GameState):
     def __init__(self, input_state):
         super().__init__(input_state)
-        self._clock = pygame.time.Clock()
         self._game = PlayGame(input_state)
-        self._message = entities.TextSprite(text="Game Starting in ...", color=(0, 255, 0))
+        self._display_time = 0
 
-        center = pygame.Vector2(config.WINDOW_SIZE.width * 0.5 - self._message.rect.width * 0.5,
-                  config.WINDOW_SIZE.height * 0.5 - self._message.rect.height * 0.5)
+        messages = ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
+        messages.append("Begin!")
 
-        self._message.set_position(center)
+        self._messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in messages]
+
+        for msg in self._messages:
+            center = pygame.Vector2(config.WINDOW_SIZE.width * 0.5 - msg.rect.width * 0.5,
+                                    config.WINDOW_SIZE.height * 0.5 - msg.rect.height * 0.5)
+
+            msg.set_position(center)
 
     @property
     def next_state(self):
@@ -109,11 +114,22 @@ class BeginGame(GameState):
 
     @property
     def finished(self):
-        return False
+        return len(self._messages) == 0
 
     def update(self, elapsed):
-        pass  # todo: update message (don't update board though!)
+        self._display_time += elapsed
+
+        if self._display_time >= config.DURATION_PER_MESSAGE and len(self._messages) > 0:
+            self._messages = self._messages[1:]
+            self._display_time -= config.DURATION_PER_MESSAGE
+
+        # allow game to start once we're on last message (which should be "begin")
+        if len(self._messages) <= 1:
+            self._game.update(elapsed)
 
     def draw(self, screen):
         self._game.draw(screen)  # draw board
-        screen.blit(source=self._message.image, dest=self._message.rect)
+
+        if len(self._messages) > 0:
+            current = self._messages[0]
+            screen.blit(source=current.image, dest=current.rect)

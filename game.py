@@ -17,9 +17,13 @@ elapsed_time = 0.0
 # create initial game state: this will control each stage of the game
 state = GameState.create_initial(input_state)
 
-while not input_state.quit and not state.finished:
+while not input_state.quit and (not state is None and not state.finished):
     input_state.event_loop()
     state.update(elapsed_time)
+
+    if state.finished:
+        state = state.next_state
+        
     state.draw(screen)
     pygame.display.flip()
 

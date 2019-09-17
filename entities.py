@@ -2,7 +2,6 @@ import pygame
 from pygame.locals import *
 import math
 import helper
-from enum import Enum
 
 
 class Ball(pygame.sprite.Sprite):
@@ -56,7 +55,7 @@ class Ball(pygame.sprite.Sprite):
         return self.position
 
 
-class MovementDirection(Enum):
+class MovementDirection:
     LEFT = pygame.Vector2(-1, 0)
     RIGHT = pygame.Vector2(1, 0)
     UP = pygame.Vector2(0, -1)
@@ -90,7 +89,7 @@ class Paddle(pygame.sprite.Sprite):
         self.rect = paddle_bounds.copy()
         self.position.x = self.movement_bounds.centerx
         self.position.y = self.movement_bounds.centery
-        self.update(0.0)
+        self.update(0.0)  # set up rect to match position
 
     def update(self, elapsed):
         move_amount = self.velocity * elapsed
@@ -103,7 +102,7 @@ class Paddle(pygame.sprite.Sprite):
         self.rect.centery = self.position.y
 
     def move(self, direction=MovementDirection.STOP):
-        self.velocity = direction.value * self.speed
+        self.velocity = direction * self.speed
 
     def get_position(self):
         return self.position
