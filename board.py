@@ -14,20 +14,21 @@ class PaddleType:
 class Board:
     BACKGROUND_COLOR = pygame.Color('#000000')
     BALL_COLOR = pygame.Color('#FF0000')
+    SCORE_COLOR = pygame.Color('#FFFFFF')
 
     NET_DASH_LENGTH = 30
-    NET_WIDTH = 10
+    NET_WIDTH = 2
 
     BALL_RADIUS = 10
     BALL_SPEED = 400.0
 
-    PADDLE_SPEED = 200.0
+    PADDLE_SPEED = 400.0
 
     IN_PROGRESS = 0
     LEFT_PLAYER = 1
     RIGHT_PLAYER = 2
 
-    def __init__(self, input, size, left_player_generator, right_player_generator):
+    def __init__(self, input, state, size, left_player_generator, right_player_generator):
         assert size.width > 0 and size.height > 0
 
         self._bounds = pygame.Rect(0, 0, size.width, size.height)
@@ -38,18 +39,23 @@ class Board:
         self._ball = Board._create_ball(self._bounds, initial_pos=self._bounds.center,
                                         initial_velocity=Board._create_initial_velocity())
 
-        left_center = self._create_paddle(10, 100, type=PaddleType.VERTICAL)
-        left_top = self._create_paddle(100, 10, type=PaddleType.TOP)
-        left_bottom = self._create_paddle(100, 10, type=PaddleType.BOTTOM)
+        left_center = self._create_paddle(10, 100, paddle_type=PaddleType.VERTICAL)
+        left_top = self._create_paddle(100, 10, paddle_type=PaddleType.TOP)
+        left_bottom = self._create_paddle(100, 10, paddle_type=PaddleType.BOTTOM)
 
         right_center = self._create_paddle(10, 100, player=Board.RIGHT_PLAYER)
-        right_top = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, type=PaddleType.TOP)
-        right_bottom = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, type=PaddleType.BOTTOM)
+        right_top = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, paddle_type=PaddleType.TOP)
+        right_bottom = self._create_paddle(100, 10, player=Board.RIGHT_PLAYER, paddle_type=PaddleType.BOTTOM)
 
         self._paddles = pygame.sprite.Group(left_center, left_top, left_bottom, right_center, right_top, right_bottom)
         self._passives = pygame.sprite.Group(net)
 
         self._status = Board.IN_PROGRESS
+
+        left_score = self._create_text(pygame.Vector2(left_top.rect.centerx, left_top.rect.top), str(state.points[0]))
+        right_score = self._create_text(pygame.Vector2(right_top.rect.centerx, right_top.rect.top), str(state.points[1]))
+
+        self._scores = pygame.sprite.Group(left_score, right_score)
 
         self._left_player = left_player_generator(input, left_center, left_top, left_bottom)
         self._right_player = right_player_generator(input, right_center, right_top, right_bottom)
@@ -63,6 +69,7 @@ class Board:
 
         # if the ball isn't anywhere on the field, it's out of bounds
         if not self._ball.rect.colliderect(self._bounds):
+            # determine which player lost the ball: the other player scores a point
             if self._ball.get_position().x < self._bounds.left:
                 self._status = Board.LEFT_PLAYER
             else:
@@ -97,8 +104,8 @@ class Board:
 
         return ball
 
-    def _create_paddle(self, width, height, player=LEFT_PLAYER, type=PaddleType.VERTICAL):
-        is_vertical = type == PaddleType.VERTICAL
+    def _create_paddle(self, width, height, player=LEFT_PLAYER, paddle_type=PaddleType.VERTICAL):
+        is_vertical = paddle_type == PaddleType.VERTICAL
 
         # define movement area
         movement_bounds = pygame.Rect(0, 0, self._bounds.width, self._bounds.height)
@@ -111,7 +118,7 @@ class Board:
                 movement_bounds.height = 1
                 movement_bounds.width = self._bounds.width * 0.5  # can only move on its half of board
 
-                if type == PaddleType.BOTTOM:
+                if paddle_type == PaddleType.BOTTOM:
                     movement_bounds.top = self._bounds.height - height * 0.5
 
         else:  # right player
@@ -125,8 +132,8 @@ class Board:
             else:
                 movement_bounds.height = 1
 
-                if type == PaddleType.BOTTOM:  # adjust paddle so it lies at bottom of screen
-                    movement_bounds.top = self._bounds.height - height * 0.5
+                if paddle_type == PaddleType.BOTTOM:  # adjust paddle so it lies at bottom of screen
+                    movement_bounds.top = self._bounds.height - height
 
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)
@@ -147,3 +154,10 @@ class Board:
         velocity.x *= x_velocity_multiplayer
 
         return velocity * Board.BALL_SPEED
+
+    @classmethod
+    def _create_text(cls, position, text=""):
+        sprite = entities.TextSprite(text, color=Board.SCORE_COLOR)
+        sprite.set_position(position)
+
+        return sprite

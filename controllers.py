@@ -10,7 +10,7 @@ class DefaultPlayer:
         self.horizontal_paddles = [top_paddle, bottom_paddle]
 
     def update(self, elapsed, ball):
-        pass
+        self.vertical.move(MovementDirection.UP)
 
 
 class PlayerController(DefaultPlayer):
@@ -60,7 +60,7 @@ class ComputerController(DefaultPlayer):
     @classmethod
     def _dist_squared(cls, coord1, coord2):
         delta = coord1 - coord2
-        return delta ** 2
+        return delta * delta
 
     def update(self, elapsed, ball):
         vertical_pos = self.vertical.get_position().y
@@ -69,7 +69,6 @@ class ComputerController(DefaultPlayer):
         # handle center paddle
         # decide which direction to move it (or if it should not be moved at all)
         in_dead_zone = ComputerController._dist_squared(vertical_pos, ball_pos.y) < self.dead_zone_y
-        in_dead_zone = False  # temp!
 
         if ball_pos.y < vertical_pos and not in_dead_zone:
             self.vertical.move(MovementDirection.UP)
@@ -77,9 +76,6 @@ class ComputerController(DefaultPlayer):
             self.vertical.move(MovementDirection.DOWN)
         else:
             self.vertical.move(MovementDirection.STOP)
-
-        # direction = MovementDirection.UP if self.vertical.get_position().y > ball.get_position().y else MovementDirection.DOWN
-        # self.vertical.move(direction)
 
         # handle horizontal paddles
         in_dead_zone = ComputerController._dist_squared(self.horizontal_paddles[0].get_position().x, ball_pos.x) < self.dead_zone_x
