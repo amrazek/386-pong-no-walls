@@ -1,8 +1,8 @@
 import pygame
-import entities
 import math
 import random
-
+import entities
+import config
 
 class PaddleType:
     VERTICAL = 0
@@ -11,21 +11,6 @@ class PaddleType:
 
 
 class Board:
-    BACKGROUND_COLOR = pygame.Color('#000000')
-    BALL_COLOR = pygame.Color('#FF0000')
-    SCORE_COLOR = pygame.Color('#FFFFFF')
-
-    NET_DASH_LENGTH = 30
-    NET_WIDTH = 2
-
-    PADDLE_LENGTH = 100
-    PADDLE_THICKNESS = 10
-
-    BALL_RADIUS = 10
-    BALL_SPEED = 100.0
-
-    PADDLE_SPEED = 400.0
-
     IN_PROGRESS = 0
     LEFT_PLAYER = 1
     RIGHT_PLAYER = 2
@@ -34,7 +19,7 @@ class Board:
         assert size.width > 0 and size.height > 0
 
         self._bounds = pygame.Rect(0, 0, size.width, size.height)
-        self._background = Board.BACKGROUND_COLOR
+        self._background = config.BACKGROUND_COLOR
 
         net = Board._create_net(self._bounds)
 
@@ -93,16 +78,16 @@ class Board:
     def _create_net(cls, board_bounds):
         net = entities.Net(
             board_bounds=board_bounds,
-            dash_length=cls.NET_DASH_LENGTH,
-            net_width=cls.NET_WIDTH)
+            dash_length=config.NET_DASH_LENGTH,
+            net_width=config.NET_WIDTH)
 
         return net
 
     @classmethod
     def _create_ball(cls, bounds, initial_velocity):
         ball = entities.Ball(
-            ball_color=Board.BALL_COLOR,
-            radius=Board.BALL_RADIUS,
+            ball_color=config.BALL_COLOR,
+            radius=config.BALL_RADIUS,
             velocity_vector=initial_velocity,
             bounds=bounds)
 
@@ -111,8 +96,8 @@ class Board:
     def _create_paddle(self, player=LEFT_PLAYER, paddle_type=PaddleType.VERTICAL):
         is_vertical = paddle_type == PaddleType.VERTICAL
 
-        width = Board.PADDLE_THICKNESS if is_vertical else Board.PADDLE_LENGTH
-        height = Board.PADDLE_THICKNESS if not is_vertical else Board.PADDLE_LENGTH
+        width = config.PADDLE_THICKNESS if is_vertical else config.PADDLE_LENGTH
+        height = config.PADDLE_THICKNESS if not is_vertical else config.PADDLE_LENGTH
 
         # define movement area
         movement_bounds = pygame.Rect(0, 0, self._bounds.width, self._bounds.height)
@@ -130,8 +115,8 @@ class Board:
 
                 # also, do not let the paddle move so far to the left that it intersects
                 # the vertical paddle
-                movement_bounds.width -= Board.PADDLE_THICKNESS
-                movement_bounds.left += Board.PADDLE_THICKNESS
+                movement_bounds.width -= config.PADDLE_THICKNESS
+                movement_bounds.left += config.PADDLE_THICKNESS
 
         else:  # right player
             # everything must be on right-hand side, so start by moving the whole rect
@@ -149,12 +134,12 @@ class Board:
 
                 # also, do not let the paddle move so far to the left that it intersects
                 # the vertical paddle
-                movement_bounds.width -= Board.PADDLE_THICKNESS
+                movement_bounds.width -= config.PADDLE_THICKNESS
 
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)
 
-        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds, speed=Board.PADDLE_SPEED)
+        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds, speed=config.PADDLE_SPEED)
 
         return paddle
 
@@ -169,11 +154,11 @@ class Board:
         velocity = pygame.Vector2(math.cos(arc_angle - 3.14159 / 6.0), math.sin(arc_angle - 3.14159 / 6.0))
         velocity.x *= x_velocity_multiplier
 
-        return velocity * Board.BALL_SPEED
+        return velocity * config.BALL_SPEED
 
     @classmethod
     def _create_text(cls, position, text=""):
-        sprite = entities.TextSprite(text, color=Board.SCORE_COLOR)
+        sprite = entities.TextSprite(text, color=config.SCORE_COLOR)
 
         # calculate corrected position such that the text is centered
         # at given position

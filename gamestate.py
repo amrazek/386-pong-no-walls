@@ -68,7 +68,7 @@ class PlayGame(GameState):
 
         self.board = Board(input_state=input_state,
                            state=self,
-                           size=config.window_size,
+                           size=config.WINDOW_SIZE,
                            left_player_generator=controllers.ComputerController,
                            right_player_generator=controllers.ComputerController)
 
@@ -98,8 +98,8 @@ class BeginGame(GameState):
         self._game = PlayGame(input_state)
         self._message = entities.TextSprite(text="Game Starting in ...", color=(0, 255, 0))
 
-        center = pygame.Vector2(config.window_size.width * 0.5 - self._message.rect.width * 0.5,
-                  config.window_size.height * 0.5 - self._message.rect.height * 0.5)
+        center = pygame.Vector2(config.WINDOW_SIZE.width * 0.5 - self._message.rect.width * 0.5,
+                  config.WINDOW_SIZE.height * 0.5 - self._message.rect.height * 0.5)
 
         self._message.set_position(center)
 

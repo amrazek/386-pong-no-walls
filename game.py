@@ -4,13 +4,13 @@ from pygame.locals import *
 from gamestate import GameState, InputState
 from helper import *
 
-screen = pygame.display.set_mode(size=config.window_size, flags=HWSURFACE)
+screen = pygame.display.set_mode(size=config.WINDOW_SIZE, flags=HWSURFACE)
 pygame.display.set_caption("Pong No Walls")
 pygame.font.init()
 clock = pygame.time.Clock()
 input_state = InputState()
 
-board_bounds = pygame.Rect(0, 0, config.window_size.width, config.window_size.height)
+board_bounds = pygame.Rect(0, 0, config.WINDOW_SIZE.width, config.WINDOW_SIZE.height)
 
 elapsed_time = 0.0
 

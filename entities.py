@@ -25,7 +25,8 @@ class Ball(pygame.sprite.Sprite):
 
         pygame.draw.circle(self.image, ball_color, (radius, radius), radius)
 
-        self.rect = pygame.Rect(200, 200, radius * 2, radius * 2)
+        self.rect = pygame.Rect(0, 0, radius * 2, radius * 2)
+        self.rect.center = self.position
 
     def update(self, elapsed_seconds, paddles):
         delta_position = self.velocity * elapsed_seconds
