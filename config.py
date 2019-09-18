@@ -20,7 +20,8 @@ NET_WIDTH = 2
 
 COUNTDOWN_BEGIN = 3
 DURATION_PER_MESSAGE = 0.5  # in seconds
-DURATION_PER_GAME_VICTORY_MESSAGE =  1.0  # in seconds
+DURATION_PER_GAME_VICTORY_MESSAGE = 1.0  # in seconds
+DURATION_VICTORY_SLIDE = 2  # in seconds, how long it takes to slide view in victory screen
 
 VERTICAL_PADDLE_SURFACE = None
 HORIZONTAL_PADDLE_SURFACE = None

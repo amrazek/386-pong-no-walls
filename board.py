@@ -75,12 +75,13 @@ class Board:
         self._left_score.set_text(self._left_player.get_name() + ": " + str(state.points[0]))
         self._right_score.set_text(self._right_player.get_name() + ": " + str(state.points[1]))
 
-    def draw(self, screen):
+    def draw(self, screen, draw_ball=True):
         screen.fill(self._background)
         self._passives.draw(screen)
         self._paddles.draw(screen)
 
-        screen.blit(dest=self._ball.rect, source=self._ball.image)
+        if draw_ball:
+            screen.blit(dest=self._ball.rect, source=self._ball.image)
 
     def get_status(self):
         return self._status

@@ -45,7 +45,7 @@ class GameState:
             self._left_score, self._right_score = previous_state.points
             self._left_wins, self._right_wins = previous_state.games_won
         else:
-            self._left_score, self._right_score = 11, 12
+            self._left_score, self._right_score = 0, 0
             self._left_wins, self._right_wins = 0, 0
 
         self._input_state = input_state
@@ -271,6 +271,14 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
     def __init__(self, input_state, previous_state=None):
         super().__init__(input_state, previous_state)
 
+        # rather than clone this time, take a snapshot of the board's current status
+        # this can be used to smoothly move board off-screen and results on-screen
+        self._snapshot = pygame.Surface(config.WINDOW_SIZE)
+        self._snapshot_rect = pygame.Rect(0, 0, self._snapshot.get_width(), self._snapshot.get_height())
+        self._snapshot_y_position = 0.0
+
+        previous_state.board.draw(self._snapshot, draw_ball=False)
+
         # create "X won game" message
         winner, score = (previous_state.board.left_player, previous_state.games_won[0]) \
             if self.points[0] > self.points[1] else (previous_state.board.right_player, self.games_won[1])
@@ -288,7 +296,6 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
         self._play_again.set_center(below_won_prompt)
 
         # track display time
-        self._elapsed = 0.0
         self._finished = False
         self._next_state = None
 
@@ -316,7 +323,11 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
         elif self._input_state.no:
             self._finished = True
 
+        self._snapshot_y_position += float(self._snapshot.get_height()) / config.DURATION_VICTORY_SLIDE * elapsed
+        self._snapshot_rect.top = int(self._snapshot_y_position)
+
     def draw(self, screen):
         screen.fill(config.BACKGROUND_COLOR)
+        screen.blit(source=self._snapshot, dest=self._snapshot_rect)
         screen.blit(source=self._game_won.image, dest=self._game_won.rect)
         screen.blit(source=self._play_again.image, dest=self._play_again.rect)
