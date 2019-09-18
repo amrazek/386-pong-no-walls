@@ -1,3 +1,14 @@
 Music from https://filmmusic.io
 "Your Call" by Kevin MacLeod (https://incompetech.com)
 License: CC BY (http://creativecommons.org/licenses/by/4.0/)
+
+Sound Effects from https://opengameart.org
+"win sound 1-2" https://opengameart.org/content/win-sound-1
+License: CC BY (http://creativecommons.org/licenses/by/4.0/)
+
+"Fanfare 02" https://opengameart.org/content/fanfare-02
+by Fantasy Musica www.fantasymusica.org
+License: CC BY (http://creativecommons.org/licenses/by/4.0/)
+
+Blips generated using SFXR program
+http://www.drpetter.se/project_sfxr.html

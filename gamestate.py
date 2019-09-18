@@ -85,7 +85,7 @@ class PlayGame(GameState):
         self.board = Board(input_state=input_state,
                            state=self,
                            size=config.WINDOW_SIZE,
-                           left_player_generator=players.ComputerPlayer,
+                           left_player_generator=players.Player,
                            right_player_generator=players.ComputerPlayer)
 
     @property
@@ -113,12 +113,16 @@ class PlayGame(GameState):
 
                 self._left_score = self._right_score = 0  # reset for next game
 
-        # determine if a player has won the set
-        if self._left_wins < config.NUMBER_GAMES_REQUIRED_VICTORY and \
-                self._right_wins < config.NUMBER_GAMES_REQUIRED_VICTORY:
-            # display victory screen, then move to next game
-            #return BeginGame(input_state=self._input_state, previous_state=self)
-            return GameVictory(input_state=self._input_state, previous_state=self)
+                # note: it's possible this win gives the player the overall win, so make sure the game
+                # must continue
+                if max(self._left_wins, self._right_wins) < config.NUMBER_GAMES_REQUIRED_VICTORY:
+                    return GameVictory(input_state=self._input_state, previous_state=self)
+                # otherwise, game is over
+
+        # should game continue, or has a player won the set?
+        if max(self._left_wins, self._right_wins) < config.NUMBER_GAMES_REQUIRED_VICTORY:
+            # match still in progress, begin next match
+            return BeginGame(input_state=self._input_state, previous_state=self)
         else:
             return GameOver(input_state=self._input_state, previous_state=self)
 
@@ -238,6 +242,12 @@ class GameVictory(GameState):
         # track display time
         self._elapsed = 0.0
 
+        # play appropriate sound file
+        sound = config.VICTORY_SHORT if winner is self.board.right_player else None
+
+        if sound is not None:
+            config.VICTORY_SHORT.play()
+
     @property
     def next_state(self):
         if not self.finished:
@@ -281,6 +291,12 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
         self._elapsed = 0.0
         self._finished = False
         self._next_state = None
+
+        # play long victory (if appropriate)
+        sound = config.VICTORY_LONG if winner is previous_state.board.right_player else None
+
+        if sound is not None:
+            sound.play()
 
     @property
     def next_state(self):
