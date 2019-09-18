@@ -53,7 +53,7 @@ class Board:
         self._left_score.set_position(self._left_score.get_position() + delta_pos)
         self._right_score.set_position(self._right_score.get_position() + delta_pos)
 
-        self._passives = pygame.sprite.Group(self._left_score, self._right_score)
+        self._passives.add(self._left_score, self._right_score)
 
     def update(self, elapsed):
         self._ball.update(elapsed, self._paddles)
@@ -172,6 +172,7 @@ class Board:
         velocity = pygame.Vector2(math.cos(arc_angle - 3.14159 / 6.0), math.sin(arc_angle - 3.14159 / 6.0))
         velocity.x *= x_velocity_multiplier
 
+        # todo: random velocity (angle AND speed)
         return velocity * config.BALL_SPEED
 
     @classmethod
