@@ -20,8 +20,6 @@ class HumanPlayer(Player):
         super().__init__(input_state, vertical_paddle, top_paddle, bottom_paddle)
 
     def update(self, elapsed, ball):
-        move_dir = MovementDirection.STOP
-
         if self._input_state.left and not self._input_state.right:
             move_dir = MovementDirection.LEFT
         elif self._input_state.right and not self._input_state.left:
@@ -50,29 +48,34 @@ class ComputerPlayer(Player):
     def __init__(self, input_state, vertical_paddle, top_paddle, bottom_paddle):
         super().__init__(input_state, vertical_paddle, top_paddle, bottom_paddle)
 
-    @classmethod
-    def _dist_squared(cls, coord1, coord2):
-        delta = coord1 - coord2
-        return delta * delta
-
     def update(self, elapsed, ball):
-        vertical_pos = self._vertical.get_position().y
         ball_pos = ball.get_position()
+
+        # if target is less than this amount, the paddle will overshoot the target position
+        # and cause a jittery motion next frame
+        min_movement = self._vertical.speed * elapsed
 
         # handle center paddle
         # decide which direction to move it (or if it should not be moved at all)
-        if ball_pos.y < vertical_pos:
+        delta_y = ball_pos.y - self._vertical.get_position().y
+
+        if delta_y < 0 and abs(delta_y) > min_movement:
             self._vertical.move(MovementDirection.UP)
-        elif ball_pos.y > vertical_pos:
+        elif delta_y > 0 and abs(delta_y) > min_movement:
             self._vertical.move(MovementDirection.DOWN)
         else:
             self._vertical.move(MovementDirection.STOP)
 
         # handle horizontal paddles
-        if self._horizontal_paddles[0].get_position().x > ball.get_position().x:
+        delta_x = ball_pos.x - self._horizontal_paddles[0].get_position().x
+        min_movement = self._horizontal_paddles[0].speed * elapsed
+
+        if delta_x < 0 and abs(delta_x) > min_movement:
             direction = MovementDirection.LEFT
-        else:
+        elif delta_x > 0 and abs(delta_x > min_movement):
             direction = MovementDirection.RIGHT
+        else:
+            direction = MovementDirection.STOP
 
         for h in self._horizontal_paddles:
             h.move(direction)

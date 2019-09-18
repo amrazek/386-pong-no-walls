@@ -22,12 +22,10 @@ state = GameState.create_initial(input_state)
 while not input_state.quit and (state is not None and not state.finished):
     input_state.event_loop()
     state.update(elapsed_time)
-
-    if state.finished:
-        state = state.next_state
-
     state.draw(screen)
     pygame.display.flip()
+
+    state = state if not state.finished else state.next_state
 
     # limit FPS to 60, but otherwise execute as quickly as possible
     elapsed_time = clock.tick_busy_loop(60) / 1000.0

@@ -11,10 +11,8 @@ class InputState:
     def __init__(self):
         self.quit = False
 
-        self.left = False
-        self.right = False
-        self.up = False
-        self.down = False
+        self.left, self.right, self.up, self.down = False, False, False, False
+        self.yes, self.no = False, False
 
     def event_loop(self):
         for evt in pygame.event.get():
@@ -33,6 +31,10 @@ class InputState:
                     self.down = state
                 elif evt.key == K_ESCAPE:
                     self.quit = True
+                elif evt.key == K_y:
+                    self.yes = state
+                elif evt.key == K_n:
+                    self.no = state
 
 
 # base state which other "states" (playing a game, menu, victory, etc) derive
@@ -75,7 +77,7 @@ class GameState:
         return self._left_wins, self._right_wins
 
 
-# this is actual "in game" play and runs until the ball goes out of bounds
+# this is actual "in game" play and runs until the ball goes out of bounds (board status tells us this has happened)
 class PlayGame(GameState):
     def __init__(self, input_state, previous_state=None):
         super().__init__(input_state, previous_state)
@@ -111,15 +113,14 @@ class PlayGame(GameState):
 
                 self._left_score = self._right_score = 0  # reset for next game
 
-                return GameVictory(input_state=self._input_state, previous_state=self)
-
         # determine if a player has won the set
         if self._left_wins < config.NUMBER_GAMES_REQUIRED_VICTORY and \
-                self._left_wins < config.NUMBER_GAMES_REQUIRED_VICTORY:
-            # move to next game
-            return BeginGame(input_state=self._input_state, previous_state=self)
+                self._right_wins < config.NUMBER_GAMES_REQUIRED_VICTORY:
+            # display victory screen, then move to next game
+            #return BeginGame(input_state=self._input_state, previous_state=self)
+            return GameVictory(input_state=self._input_state, previous_state=self)
         else:
-            raise NotImplementedError  # TODO: victory screen
+            return GameOver(input_state=self._input_state, previous_state=self)
 
     @property
     def finished(self):
@@ -141,7 +142,8 @@ class BeginGame(GameState):
         self._game = PlayGame(input_state, previous_state)
         self._display_time = 0
 
-        _countdown_messages = ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
+        _countdown_messages = \
+            ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
         _countdown_messages.append("Begin!")
 
         self._countdown_messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in _countdown_messages]
@@ -253,3 +255,52 @@ class GameVictory(GameState):
     def draw(self, screen):
         self.board.draw(screen)
         screen.blit(source=self._game_won.image, dest=self._game_won.rect)
+
+
+class GameOver(GameState):  # this state occurs when an overall winner is found
+    def __init__(self, input_state, previous_state=None):
+        super().__init__(input_state, previous_state)
+
+        # create "X won game" message
+        winner, score = (previous_state.board.left_player, previous_state.games_won[0]) \
+            if self.points[0] > self.points[1] else (previous_state.board.right_player, self.games_won[1])
+
+        self._game_won = entities.TextSprite(
+            text=winner.name + " wins! ", color=config.SCORE_COLOR, size=26)
+
+        self._play_again = entities.TextSprite(
+            text="Play again? Y/N", color=config.SCORE_COLOR, size=18)
+
+        self._game_won.set_center(previous_state.board.bounds.center)
+
+        below_won_prompt = pygame.Vector2(self._game_won.rect.centerx, \
+                                          self._game_won.rect.bottom + self._play_again.rect.height)
+        self._play_again.set_center(below_won_prompt)
+
+        # track display time
+        self._elapsed = 0.0
+        self._finished = False
+        self._next_state = None
+
+    @property
+    def next_state(self):
+        if not self.finished:
+            raise RuntimeError
+
+        return self._next_state
+
+    @property
+    def finished(self):
+        return self._input_state.quit or self._finished
+
+    def update(self, elapsed):
+        if self._input_state.yes:
+            self._next_state = GameState.create_initial(self._input_state)
+            self._finished = True
+        elif self._input_state.no:
+            self._finished = True
+
+    def draw(self, screen):
+        screen.fill(config.BACKGROUND_COLOR)
+        screen.blit(source=self._game_won.image, dest=self._game_won.rect)
+        screen.blit(source=self._play_again.image, dest=self._play_again.rect)
