@@ -162,19 +162,36 @@ class BeginGame(GameState):
         left_points_needed = BeginGame.calc_points_needed(self.points[0], self.points[1])
         right_points_needed = BeginGame.calc_points_needed(self.points[1], self.points[0])
 
-        self._left_spr = entities.TextSprite(text=str(left_points_needed) + " points to go!",
-                                             color=config.SCORE_COLOR)
+        left_points_text = entities.TextSprite(text=str(left_points_needed) + " points to go!",
+                                               color=config.SCORE_COLOR)
 
-        self._right_spr = entities.TextSprite(text=str(right_points_needed) + " points to go!",
-                                              color=config.SCORE_COLOR)
+        right_points_text = entities.TextSprite(text=str(right_points_needed) + " points to go!",
+                                                color=config.SCORE_COLOR)
+
+        # display how many games each player has won
+
+        left_player_wins_text = entities.TextSprite(text=str(self.games_won[0]) + " wins", color=config.SCORE_COLOR)
+        right_player_wins_text = entities.TextSprite(text=str(self.games_won[1]) + " wins", color=config.SCORE_COLOR)
 
         def center_text(text_sprite, board_location):
             text_sprite.rect.center = board_location
 
         quarter_offset = make_vector(config.WINDOW_SIZE.width * 0.25, 0)
 
-        center_text(self._left_spr, board_center - quarter_offset)
-        center_text(self._right_spr, board_center + quarter_offset)
+        center_text(left_points_text, board_center - quarter_offset)
+        center_text(right_points_text, board_center + quarter_offset)
+
+        quarter_offset.y = -(left_points_text.rect.height + left_player_wins_text.rect.height)
+
+        center_text(left_player_wins_text, board_center - quarter_offset)
+        quarter_offset.y *= -1
+
+        center_text(right_player_wins_text, board_center + quarter_offset)
+
+        self._text_group = pygame.sprite.Group(left_player_wins_text,
+                                               left_points_text,
+                                               right_player_wins_text,
+                                               right_points_text)
 
     @property
     def next_state(self):
@@ -202,8 +219,9 @@ class BeginGame(GameState):
             current = self._countdown_messages[0]
             screen.blit(source=current.image, dest=current.rect)
 
-        screen.blit(source=self._left_spr.image, dest=self._left_spr.rect)
-        screen.blit(source=self._right_spr.image, dest=self._right_spr.rect)
+        self._text_group.draw(screen)
+        # screen.blit(source=self._left_spr.image, dest=self._left_spr.rect)
+        # screen.blit(source=self._right_spr.image, dest=self._right_spr.rect)
 
     @staticmethod
     def calc_points_needed(target_player_points, other_player_points):

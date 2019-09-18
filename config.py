@@ -8,7 +8,7 @@ BACKGROUND_COLOR = Color('#000000')
 SCORE_COLOR = Color('#FFFFFF')
 
 PADDLE_LENGTH = 100  # paddle dimensions const for now, need to alter image loading
-PADDLE_THICKNESS = 4
+PADDLE_THICKNESS = 8
 
 PADDLE_SPEED = 400.0
 
