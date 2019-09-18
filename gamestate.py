@@ -85,7 +85,7 @@ class PlayGame(GameState):
         self.board = Board(input_state=input_state,
                            state=self,
                            size=config.WINDOW_SIZE,
-                           left_player_generator=players.Player,
+                           left_player_generator=players.ComputerPlayer,
                            right_player_generator=players.ComputerPlayer)
 
     @property

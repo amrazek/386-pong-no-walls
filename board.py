@@ -165,19 +165,14 @@ class Board:
 
     @classmethod
     def _create_initial_velocity(cls):
-        # determine a 60 degree arc
-        arc_angle = random.uniform(0, 60.0 * 3.14159 / 180.0)
+        # select a random angle to move at
+        angle = random.uniform(0, 3.14159 * 2.0)
 
-        # determine which player heading will receive ball initially
-        x_velocity_multiplier = [-1.0, 1.0][random.randint(0, 1)]
+        # select a random speed
+        speed = random.uniform(0, config.BALL_MAX_SPEED - config.BALL_MIN_SPEED) + config.BALL_MIN_SPEED
 
-        velocity = pygame.Vector2(math.cos(arc_angle - 3.14159 / 6.0), math.sin(arc_angle - 3.14159 / 6.0))
-        velocity.x *= x_velocity_multiplier
-
-        # todo: random velocity (angle AND speed)
-        #return velocity * config.BALL_SPEED
-
-        return pygame.Vector2(1, 0) * config.BALL_SPEED
+        # calculate velocity
+        return pygame.Vector2(math.cos(angle), math.sin(angle)) * speed
 
     @classmethod
     def _create_text(cls, position, text=""):
