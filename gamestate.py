@@ -86,7 +86,7 @@ class PlayGame(GameState):
                            state=self,
                            size=config.WINDOW_SIZE,
                            left_player_generator=players.ComputerPlayer,
-                           right_player_generator=players.ComputerPlayer)
+                           right_player_generator=players.Player)
 
     @property
     def next_state(self):
@@ -243,10 +243,10 @@ class GameVictory(GameState):
         self._elapsed = 0.0
 
         # play appropriate sound file
-        sound = config.VICTORY_SHORT if winner is self.board.right_player else None
+        sound = config.VICTORY_SHORT if winner is self.board.right_player else config.FAILURE_SHORT
 
         if sound is not None:
-            config.VICTORY_SHORT.play()
+            sound.play()
 
     @property
     def next_state(self):
@@ -300,7 +300,7 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
         self._next_state = None
 
         # play long victory (if appropriate)
-        sound = config.VICTORY_LONG if winner is previous_state.board.right_player else None
+        sound = config.VICTORY_LONG if winner is previous_state.board.right_player else config.FAILURE_LONG
 
         if sound is not None:
             sound.play()

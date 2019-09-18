@@ -34,12 +34,14 @@ MIN_POINT_DIFFERENCE_TO_WIN = 2  # winner must have at least this many more poin
 
 PADDLE_BOUNCE_SOUNDS = []
 VICTORY_SHORT = None
+FAILURE_SHORT = None
 VICTORY_LONG = None
+FAILURE_LONG = None
 
 
 def load_images():
-    base_paddle_image = pygame.image.load("images/paddle.png")
-    base_ball_image = pygame.image.load("images/ball.png")
+    base_paddle_image = pygame.image.load(os.path.join("images", "paddle.png"))
+    base_ball_image = pygame.image.load(os.path.join("images", "ball.png"))
 
     # construct vertical and horizontal paddles using appropriate dimensions and
     # this base image
@@ -68,6 +70,8 @@ def load_sounds():
     global PADDLE_BOUNCE_SOUNDS
     global VICTORY_SHORT
     global VICTORY_LONG
+    global FAILURE_SHORT
+    global FAILURE_LONG
 
     if pygame.mixer:
         pygame.mixer.init()
@@ -83,6 +87,8 @@ def load_sounds():
 
         VICTORY_SHORT = load_sound("win sound 1-2.wav")
         VICTORY_LONG = load_sound("Fanfare 02.ogg")
+        FAILURE_SHORT = load_sound("lose.wav")
+        FAILURE_LONG = load_sound("GameOver.ogg")
 
 
 def load_sound(file_name):

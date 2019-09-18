@@ -25,8 +25,10 @@ class Ball(pygame.sprite.Sprite):
         ball_start = self.position
         ball_end = ball_start + delta_position
 
+        flipped_x, flipped_y = False, False
+
         # ball is on field, determine whether it has collided with any paddles
-        for paddle in pygame.sprite.spritecollide(sprite=self, group=paddles, dokill=False):
+        for paddle in paddles:
             for segment in paddle.get_line_segments():
                 intersections = helper.line_circle_intersection(ball_end, config.BALL_RADIUS, segment[0], segment[1])
 
@@ -37,14 +39,15 @@ class Ball(pygame.sprite.Sprite):
 
                     is_vertical = True if abs(segment_dir.dot(vertical_line)) >= 0.99 else False
 
-                    if is_vertical:
+                    if is_vertical and not flipped_x:
                         self.velocity.x = -self.velocity.x
-                    else:
+                        flipped_x = True
+                    elif not flipped_y:
                         self.velocity.y = -self.velocity.y
+                        flipped_y = True
 
-                    Ball.play_sound()
-
-                    return
+        if flipped_x or flipped_y:
+            Ball.play_sound()
 
         self.position += delta_position
         self.rect.center = self.position
@@ -124,9 +127,21 @@ class Paddle(pygame.sprite.Sprite):
         bottom_right = pygame.Vector2(self.rect.right, self.rect.bottom)
         bottom_left = pygame.Vector2(self.rect.left, self.rect.bottom)
 
-        return [(top_left, top_right),
-                (top_right, bottom_right),
-                (bottom_right, bottom_left), (bottom_left, top_right)]
+        is_vertical = True if self.rect.width < self.rect.height else False
+        left_side = True if self.rect.left < config.WINDOW_SIZE.width * 0.5 else False
+
+        if is_vertical:
+            if left_side:
+                return [(top_right, bottom_right)]
+            else:
+                return [(top_left, bottom_left)]
+        else:
+            is_top = True if self.rect.top < config.WINDOW_SIZE.height * 0.5 else False
+
+            if is_top:
+                return [(bottom_left, bottom_right)]
+            else:
+                return [(top_left, top_right)]
 
 
 class Net(pygame.sprite.Sprite):

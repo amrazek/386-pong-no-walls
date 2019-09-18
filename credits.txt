@@ -10,5 +10,9 @@ License: CC BY (http://creativecommons.org/licenses/by/4.0/)
 by Fantasy Musica www.fantasymusica.org
 License: CC BY (http://creativecommons.org/licenses/by/4.0/)
 
+"Game Over Sound (Old School)" https://opengameart.org/content/game-over-soundold-school
+by den_yes
+License: CC0 (https://creativecommons.org/publicdomain/zero/1.0/)
+
 Blips generated using SFXR program
 http://www.drpetter.se/project_sfxr.html
