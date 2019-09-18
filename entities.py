@@ -6,7 +6,7 @@ import config
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, bounds, radius, ball_color, velocity_vector):
+    def __init__(self, bounds, radius, velocity_vector):
         super().__init__()
 
         self.velocity = velocity_vector
@@ -150,6 +150,9 @@ class TextSprite(pygame.sprite.Sprite):
     def set_position(self, position):
         self.rect.left = position.x
         self.rect.top = position.y
+
+    def set_center(self, center_position):
+        self.rect.center = center_position
 
     def get_position(self):
         return pygame.Vector2(self.rect.left, self.rect.top)

@@ -10,7 +10,8 @@ class Player:
     def update(self, elapsed, ball):
         pass
 
-    def get_name(self):
+    @property
+    def name(self):
         return "DefaultPlayer"
 
 
@@ -40,7 +41,8 @@ class HumanPlayer(Player):
 
         self._vertical.move(move_dir)
 
-    def get_name(self):
+    @property
+    def name(self):
         return "Player"
 
 
@@ -75,5 +77,6 @@ class ComputerPlayer(Player):
         for h in self._horizontal_paddles:
             h.move(direction)
 
-    def get_name(self):
+    @property
+    def name(self):
         return "Computer"

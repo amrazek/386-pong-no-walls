@@ -18,12 +18,12 @@ class Board:
     def __init__(self, input_state, state, size, left_player_generator, right_player_generator):
         assert size.width > 0 and size.height > 0
 
-        self._bounds = pygame.Rect(0, 0, size.width, size.height)
+        self.bounds = pygame.Rect(0, 0, size.width, size.height)
         self._background = config.BACKGROUND_COLOR
 
-        net = Board._create_net(self._bounds)
+        net = Board._create_net(self.bounds)
 
-        self._ball = Board._create_ball(self._bounds, initial_velocity=Board._create_initial_velocity())
+        self._ball = Board._create_ball(self.bounds, initial_velocity=Board._create_initial_velocity())
 
         left_center = self._create_paddle(paddle_type=PaddleType.VERTICAL)
         left_top = self._create_paddle(paddle_type=PaddleType.TOP)
@@ -44,8 +44,8 @@ class Board:
         left_score_pos = pygame.Vector2(left_top.rect.centerx, left_top.rect.bottom)
         right_score_pos = pygame.Vector2(right_top.rect.centerx, right_top.rect.bottom)
 
-        self._left_score = self._create_text(left_score_pos, self._left_player.get_name() + ": " + str(state.points[0]))
-        self._right_score = self._create_text(right_score_pos, self._right_player.get_name() + ": " + str(state.points[1]))
+        self._left_score = self._create_text(left_score_pos, self._left_player.name + ": " + str(state.points[0]))
+        self._right_score = self._create_text(right_score_pos, self._right_player.name + ": " + str(state.points[1]))
 
         # text is centered at given pos, but this means it will overlap the top paddles somewhat
         delta_pos = pygame.Vector2(0, max(0.5 * self._left_score.rect.height, 0.5 * self._right_score.rect.height))
@@ -63,9 +63,9 @@ class Board:
         self._right_player.update(elapsed, self._ball)
 
         # if the ball isn't anywhere on the field, it's out of bounds
-        if not self._ball.rect.colliderect(self._bounds):
+        if not self._ball.rect.colliderect(self.bounds):
             # determine which player lost the ball: the other player scores a point
-            if self._ball.get_position().x < self._bounds.centerx:
+            if self._ball.get_position().x < self.bounds.centerx:
                 # ball went off of left player's side -> right player wins
                 self._status = Board.RIGHT_PLAYER
             else:
@@ -105,7 +105,6 @@ class Board:
     @classmethod
     def _create_ball(cls, bounds, initial_velocity):
         ball = entities.Ball(
-            ball_color=config.BALL_COLOR,
             radius=config.BALL_RADIUS,
             velocity_vector=initial_velocity,
             bounds=bounds)
@@ -119,7 +118,7 @@ class Board:
         height = config.PADDLE_THICKNESS if not is_vertical else config.PADDLE_LENGTH
 
         # define movement area
-        movement_bounds = pygame.Rect(0, 0, self._bounds.width, self._bounds.height)
+        movement_bounds = pygame.Rect(0, 0, self.bounds.width, self.bounds.height)
 
         # adjust bounds based on player side
         if player == Board.LEFT_PLAYER:
@@ -127,10 +126,10 @@ class Board:
                 movement_bounds.width = 1
             else:
                 movement_bounds.height = 1
-                movement_bounds.width = self._bounds.width * 0.5  # can only move on its half of board
+                movement_bounds.width = self.bounds.width * 0.5  # can only move on its half of board
 
                 if paddle_type == PaddleType.BOTTOM:
-                    movement_bounds.top = self._bounds.height - height
+                    movement_bounds.top = self.bounds.height - height
 
                 # also, do not let the paddle move so far to the left that it intersects
                 # the vertical paddle
@@ -139,17 +138,17 @@ class Board:
 
         else:  # right player
             # everything must be on right-hand side, so start by moving the whole rect
-            movement_bounds.left = self._bounds.width * 0.5
-            movement_bounds.width = self._bounds.width * 0.5
+            movement_bounds.left = self.bounds.width * 0.5
+            movement_bounds.width = self.bounds.width * 0.5
 
             if is_vertical:  # adjust paddle so it sits on right hand side of screen
                 movement_bounds.width = 1
-                movement_bounds.left = self._bounds.width - width
+                movement_bounds.left = self.bounds.width - width
             else:
                 movement_bounds.height = 1
 
                 if paddle_type == PaddleType.BOTTOM:  # adjust paddle so it lies at bottom of screen
-                    movement_bounds.top = self._bounds.height - height
+                    movement_bounds.top = self.bounds.height - height
 
                 # also, do not let the paddle move so far to the left that it intersects
                 # the vertical paddle
