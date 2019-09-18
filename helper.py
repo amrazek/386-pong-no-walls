@@ -69,7 +69,7 @@ def line_line_intersection(line1_p1, line1_p2, line2_p1, line2_p2):
     if math.isinf(t1):
         return ()  # parallel
     else:
-        t2 = ((line2_p1.x - line1_p1.x) * m1.y + (line1_p1.y - line2_p1.y) * m1.x) / -denominator
+        t2 = ((line2_p1.x - line1_p1.x) * m1.y + (line1_p1.y - line2_p1.y) * m1.x) / (-denominator + 0.00001)
 
         # calculate intersection points, or None if the intersection point does not lie
         # on its respective line segment
@@ -80,6 +80,22 @@ def line_line_intersection(line1_p1, line1_p2, line2_p1, line2_p2):
             return ()  # no intersections on either segment
         else:
             return intersection1, intersection2
+
+
+def closest_point_on_line(a, b, p):
+    ap = p - a
+    ab = b - a
+
+    magnitude_ab = ab.magnitude_squared()
+    ab_ap_product = ap.dot(ab)
+    distance = ab_ap_product / magnitude_ab
+
+    if distance < 0:
+        return a
+    elif distance > 1:
+        return b
+    else:
+        return a + ab * distance
 
 
 Dimensions = collections.namedtuple('Dimensions', 'width height')

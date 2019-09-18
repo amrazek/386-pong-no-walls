@@ -86,7 +86,7 @@ class PlayGame(GameState):
                            state=self,
                            size=config.WINDOW_SIZE,
                            left_player_generator=players.ComputerPlayer,
-                           right_player_generator=players.HumanPlayer)
+                           right_player_generator=players.ComputerPlayer)
 
     @property
     def next_state(self):
@@ -147,7 +147,7 @@ class BeginGame(GameState):
         self._display_time = 0
 
         _countdown_messages = \
-            ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
+            ["Game starts in " + str(x) for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
         _countdown_messages.append("Begin!")
 
         self._countdown_messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in _countdown_messages]
@@ -155,7 +155,7 @@ class BeginGame(GameState):
         board_center = make_vector(config.WINDOW_SIZE.width * 0.5, config.WINDOW_SIZE.height * 0.5)
 
         for msg in self._countdown_messages:
-            center = board_center - make_vector(msg.rect.width * 0.5, msg.rect.height * 0.5)
+            center = board_center - make_vector(msg.rect.width * 0.5, -msg.rect.height * 1.5)
             msg.set_position(center)
 
         # determine how many more points each player needs to win

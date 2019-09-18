@@ -11,7 +11,6 @@ class Ball(pygame.sprite.Sprite):
         super().__init__()
 
         self.velocity = velocity_vector
-        self.radius = radius
         self.bounds = bounds
         self.position = make_vector(self.bounds.centerx, self.bounds.centery)
 
@@ -20,37 +19,91 @@ class Ball(pygame.sprite.Sprite):
         self.rect = pygame.Rect(0, 0, radius * 2, radius * 2)
         self.rect.center = self.position
 
+    @staticmethod
+    def _intersects_paddle(ball_position, paddle):
+        for segment in paddle.get_line_segments():
+            if len(helper.line_circle_intersection(ball_position, config.BALL_RADIUS, segment[0], segment[1])) > 0:
+                return True
+
+        return False
+
+    def _sort_by_least_distance_squared(self, value):
+        delta_x = self.position.x - value[0].x
+        delta_y = self.position.y - value[0].y
+
+        return delta_x * delta_x + delta_y * delta_y
+
+    @staticmethod
+    def _get_distance(v1, v2):
+        delta_x = v1.x - v2.x
+        delta_y = v1.y - v2.y
+
+        return math.sqrt(delta_x * delta_x + delta_y * delta_y)
+
     def update(self, elapsed_seconds, paddles):
         delta_position = self.velocity * elapsed_seconds
 
         ball_start = self.position
         ball_end = ball_start + delta_position
 
-        flipped_x, flipped_y = False, False
-
         # ball is on field, determine whether it has collided with any paddles
-        for paddle in paddles:
-            for segment in paddle.get_line_segments():
-                intersections = helper.line_circle_intersection(ball_end, config.BALL_RADIUS, segment[0], segment[1])
+        old_rect = self.rect.copy()
 
-                if len(intersections) > 0:
-                    # this move has resulted in a collision!
-                    segment_dir = (segment[1] - segment[0]).normalize()
-                    vertical_line = make_vector(0, 1)
+        # temporarily update rect to make use of spritecollide
+        self.rect.center = ball_end
+        colliding_paddles = pygame.sprite.spritecollide(self, paddles, dokill=False)
+        self.rect = old_rect
 
-                    is_vertical = True if abs(segment_dir.dot(vertical_line)) >= 0.99 else False
+        if any([Ball._intersects_paddle(ball_end, paddle) for paddle in colliding_paddles]):
+            # at least one collision has occurred; determine closest intersection point
+            all_intersections = []
 
-                    if is_vertical and not flipped_x:
-                        self.velocity.x = -self.velocity.x
-                        self.velocity.y += paddle.velocity.y * elapsed_seconds
-                        flipped_x = True
-                    elif not flipped_y:
-                        self.velocity.y = -self.velocity.y
-                        self.velocity.x += paddle.velocity.x * elapsed_seconds
-                        flipped_y = True
+            for paddle in colliding_paddles:
+                for segment in paddle.get_line_segments():
+                    closest_point = helper.closest_point_on_line(segment[0], segment[1], self.position)
 
-        if flipped_x or flipped_y:
-            Ball.play_sound()
+                    intersections = helper.line_line_intersection(ball_start, closest_point, segment[0], segment[1])
+
+                    if len(intersections) > 0:
+                        all_intersections.extend([(x, segment[0], segment[1], paddle, closest_point)
+                                                  for x in intersections if x is not None])
+
+            if len(all_intersections) > 0:
+                all_intersections.sort(key=self._sort_by_least_distance_squared)
+
+                # get the segment that we were closest to
+                nearest_segment = all_intersections[0]
+                segment_start, segment_end = nearest_segment[1], nearest_segment[2]
+
+                # find closest point on this segment to the ball
+                closest_point = helper.closest_point_on_line(segment_start, segment_end, ball_end)
+
+                # adjust position of ball such that this distance is the ball's radius
+                segment_dir = (segment_end - segment_start).normalize()
+                segment_normal = make_vector(segment_dir.y, -segment_dir.x)
+
+                projected_dir = (self.velocity.dot(segment_normal)
+                                 / (segment_normal.dot(segment_normal)) * segment_normal)
+
+                # projected_dir now tells us how to move towards the nearest segment; we can use this to
+                # ensure we're at least {radius} units away
+                if self.velocity.magnitude() > 0:
+                    self.position = closest_point + -projected_dir.normalize() * config.BALL_RADIUS
+                    delta_position = pygame.Vector2()  # overwrote delta for this frame
+                    Ball.play_sound()
+
+                # adjust velocity based on the segment that was hit
+                paddle = all_intersections[0][3]
+                up = make_vector(0, 1)
+
+                is_vertical = True if abs(up.dot(segment_dir)) > 0.98 else False
+
+                if is_vertical:
+                    self.velocity.x = -self.velocity.x
+                    self.velocity.y += paddle.velocity.y * elapsed_seconds * config.PADDLE_BALL_VELOCITY_MODIFIER
+                else:
+                    self.velocity.x += paddle.velocity.x * elapsed_seconds * config.PADDLE_BALL_VELOCITY_MODIFIER
+                    self.velocity.y = -self.velocity.y
 
         self.position += delta_position
         self.rect.center = self.position
@@ -130,21 +183,7 @@ class Paddle(pygame.sprite.Sprite):
         bottom_right = make_vector(self.rect.right, self.rect.bottom)
         bottom_left = make_vector(self.rect.left, self.rect.bottom)
 
-        is_vertical = True if self.rect.width < self.rect.height else False
-        left_side = True if self.rect.left < config.WINDOW_SIZE.width * 0.5 else False
-
-        if is_vertical:
-            if left_side:
-                return [(top_right, bottom_right)]
-            else:
-                return [(top_left, bottom_left)]
-        else:
-            is_top = True if self.rect.top < config.WINDOW_SIZE.height * 0.5 else False
-
-            if is_top:
-                return [(bottom_left, bottom_right)]
-            else:
-                return [(top_left, top_right)]
+        return [(top_left, top_right), (top_right, bottom_right), (bottom_right, bottom_left), (bottom_left, top_left)]
 
 
 class Net(pygame.sprite.Sprite):

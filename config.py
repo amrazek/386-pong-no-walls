@@ -11,16 +11,17 @@ PADDLE_LENGTH = 100  # paddle dimensions const for now, need to alter image load
 PADDLE_THICKNESS = 8
 
 PADDLE_SPEED = 400.0
+PADDLE_BALL_VELOCITY_MODIFIER = 1.75  # this multiplies the velocity bonus ball gets from a moving paddle
 
 BALL_RADIUS = 10
 BALL_MIN_SPEED = 300.0
-BALL_MAX_SPEED = 450.0
+BALL_MAX_SPEED = 500.0
 
-NET_DASH_LENGTH = 30
+NET_DASH_LENGTH = 15
 NET_WIDTH = 2
 
 COUNTDOWN_BEGIN = 3
-DURATION_PER_MESSAGE = 0.5  # in seconds
+DURATION_PER_MESSAGE = 1  # in seconds for countdown messages
 DURATION_PER_GAME_VICTORY_MESSAGE = 1.0  # in seconds
 DURATION_VICTORY_SLIDE = 2  # in seconds, how long it takes to slide view in victory screen
 
