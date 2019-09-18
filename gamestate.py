@@ -128,22 +128,48 @@ class PlayGame(GameState):
 
 
 # this state displays a countdown before game begins
+# and informs players how many more points are needed
+# to win (as per project requirements)
 class BeginGame(GameState):
     def __init__(self, input_state, previous_state=None):
         super().__init__(input_state, previous_state)
         self._game = PlayGame(input_state, previous_state)
         self._display_time = 0
 
-        messages = ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
-        messages.append("Begin!")
+        countdown_messages = ["Game starts in " + str(x) + "..." for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
+        countdown_messages.append("Begin!")
 
-        self._messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in messages]
+        self.countdown_messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in countdown_messages]
 
         for msg in self._messages:
             center = pygame.Vector2(config.WINDOW_SIZE.width * 0.5 - msg.rect.width * 0.5,
                                     config.WINDOW_SIZE.height * 0.5 - msg.rect.height * 0.5)
 
             msg.set_position(center)
+
+        # determine which player has the most points, and how many more points they need to win
+        # if neither have 11 points:
+        #  if at least 2 points away:
+        #       need 11 points to win
+        #  else
+        #       need
+        min_points_required = config.MIN_POINTS_TO_WIN_RALLY
+        delta_score = abs(self.points[0] - self.points[1])
+
+        if max(self.points) < config.MIN_POINTS_TO_WIN_RALLY:  # neither player has 11 points
+            # if both players are within DIFF points, and are within DIFF points needed to win rally,
+            # then min points = base points needed + delta score diff
+
+            if delta_score < config.MIN_POINT_DIFFERENCE_TO_WIN:
+                min_points_required += delta_score
+
+        else:  # one or both players exceeds the min points, now the greater must only win by diff
+            # note: by definition, the players must be within the point diff or else this state
+            # would not have been created
+            min_points_required += min(delta_score, config.MIN_POINT_DIFFERENCE_TO_WIN)
+
+        player_with_most = self._game.board.left_player if
+
 
     @property
     def next_state(self):
@@ -156,17 +182,17 @@ class BeginGame(GameState):
     def update(self, elapsed):
         self._display_time += elapsed
 
-        if self._display_time >= config.DURATION_PER_MESSAGE and len(self._messages) > 0:
-            self._messages = self._messages[1:]
+        if self._display_time >= config.DURATION_PER_MESSAGE and len(self.countdown_messages) > 0:
+            self.countdown_messages = self.countdown_messages[1:]
             self._display_time -= config.DURATION_PER_MESSAGE
 
         # allow game to start once we're on last message (which should be "begin")
-        if len(self._messages) <= 1:
+        if len(self.countdown_messages) <= 1:
             self._game.update(elapsed)
 
     def draw(self, screen):
         self._game.draw(screen)  # draw board
 
-        if len(self._messages) > 0:
-            current = self._messages[0]
+        if len(self.countdown_messages) > 0:
+            current = self.countdown_messages[0]
             screen.blit(source=current.image, dest=current.rect)

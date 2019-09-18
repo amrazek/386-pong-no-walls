@@ -85,6 +85,14 @@ class Board:
     def get_status(self):
         return self._status
 
+    @property
+    def left_player(self):
+        return self._left_player
+
+    @property
+    def right_player(self):
+        return self._right_player
+
     @classmethod
     def _create_net(cls, board_bounds):
         net = entities.Net(
