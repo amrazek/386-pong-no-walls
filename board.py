@@ -3,6 +3,7 @@ import math
 import random
 import entities
 import config
+from helper import make_vector
 
 
 class PaddleType:
@@ -42,14 +43,14 @@ class Board:
         self._left_player = left_player_generator(input_state, left_center, left_top, left_bottom)
         self._right_player = right_player_generator(input_state, right_center, right_top, right_bottom)
 
-        left_score_pos = pygame.Vector2(left_top.rect.centerx, left_top.rect.bottom)
-        right_score_pos = pygame.Vector2(right_top.rect.centerx, right_top.rect.bottom)
+        left_score_pos = make_vector(left_top.rect.centerx, left_top.rect.bottom)
+        right_score_pos = make_vector(right_top.rect.centerx, right_top.rect.bottom)
 
         self._left_score = self._create_text(left_score_pos, self._left_player.name + ": " + str(state.points[0]))
         self._right_score = self._create_text(right_score_pos, self._right_player.name + ": " + str(state.points[1]))
 
         # text is centered at given pos, but this means it will overlap the top paddles somewhat
-        delta_pos = pygame.Vector2(0, max(0.5 * self._left_score.rect.height, 0.5 * self._right_score.rect.height))
+        delta_pos = make_vector(0, max(0.5 * self._left_score.rect.height, 0.5 * self._right_score.rect.height))
 
         self._left_score.set_position(self._left_score.get_position() + delta_pos)
         self._right_score.set_position(self._right_score.get_position() + delta_pos)
@@ -159,7 +160,9 @@ class Board:
         # define actual paddle size
         paddle_bounds = pygame.Rect(0, 0, width, height)
 
-        paddle = entities.Paddle(paddle_bounds=paddle_bounds, movement_bounds=movement_bounds, speed=config.PADDLE_SPEED)
+        paddle = entities.Paddle(paddle_bounds=paddle_bounds,
+                                 movement_bounds=movement_bounds,
+                                 speed=config.PADDLE_SPEED)
 
         return paddle
 
@@ -172,7 +175,7 @@ class Board:
         speed = random.uniform(0, config.BALL_MAX_SPEED - config.BALL_MIN_SPEED) + config.BALL_MIN_SPEED
 
         # calculate velocity
-        return pygame.Vector2(math.cos(angle), math.sin(angle)) * speed
+        return make_vector(math.cos(angle), math.sin(angle)) * speed
 
     @classmethod
     def _create_text(cls, position, text=""):

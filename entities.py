@@ -3,6 +3,7 @@ import math
 import random
 import helper
 import config
+from helper import make_vector
 
 
 class Ball(pygame.sprite.Sprite):
@@ -12,7 +13,7 @@ class Ball(pygame.sprite.Sprite):
         self.velocity = velocity_vector
         self.radius = radius
         self.bounds = bounds
-        self.position = pygame.Vector2(self.bounds.centerx, self.bounds.centery)
+        self.position = make_vector(self.bounds.centerx, self.bounds.centery)
 
         self.image = config.BALL_SURFACE
 
@@ -35,15 +36,17 @@ class Ball(pygame.sprite.Sprite):
                 if len(intersections) > 0:
                     # this move has resulted in a collision!
                     segment_dir = (segment[1] - segment[0]).normalize()
-                    vertical_line = pygame.Vector2(0, 1)
+                    vertical_line = make_vector(0, 1)
 
                     is_vertical = True if abs(segment_dir.dot(vertical_line)) >= 0.99 else False
 
                     if is_vertical and not flipped_x:
                         self.velocity.x = -self.velocity.x
+                        self.velocity.y += paddle.velocity.y * elapsed_seconds
                         flipped_x = True
                     elif not flipped_y:
                         self.velocity.y = -self.velocity.y
+                        self.velocity.x += paddle.velocity.x * elapsed_seconds
                         flipped_y = True
 
         if flipped_x or flipped_y:
@@ -67,11 +70,11 @@ class Ball(pygame.sprite.Sprite):
 
 
 class MovementDirection:
-    LEFT = pygame.Vector2(-1, 0)
-    RIGHT = pygame.Vector2(1, 0)
-    UP = pygame.Vector2(0, -1)
-    DOWN = pygame.Vector2(0, 1)
-    STOP = pygame.Vector2()
+    LEFT = make_vector(-1, 0)
+    RIGHT = make_vector(1, 0)
+    UP = make_vector(0, -1)
+    DOWN = make_vector(0, 1)
+    STOP = make_vector()
 
 
 class Paddle(pygame.sprite.Sprite):
@@ -122,10 +125,10 @@ class Paddle(pygame.sprite.Sprite):
         return helper.Dimensions(self.rect.width, self.rect.height)
 
     def get_line_segments(self):
-        top_left = pygame.Vector2(self.rect.left, self.rect.top)
-        top_right = pygame.Vector2(self.rect.right, self.rect.top)
-        bottom_right = pygame.Vector2(self.rect.right, self.rect.bottom)
-        bottom_left = pygame.Vector2(self.rect.left, self.rect.bottom)
+        top_left = make_vector(self.rect.left, self.rect.top)
+        top_right = make_vector(self.rect.right, self.rect.top)
+        bottom_right = make_vector(self.rect.right, self.rect.bottom)
+        bottom_left = make_vector(self.rect.left, self.rect.bottom)
 
         is_vertical = True if self.rect.width < self.rect.height else False
         left_side = True if self.rect.left < config.WINDOW_SIZE.width * 0.5 else False
@@ -196,7 +199,7 @@ class TextSprite(pygame.sprite.Sprite):
         self.rect.center = center_position
 
     def get_position(self):
-        return pygame.Vector2(self.rect.left, self.rect.top)
+        return make_vector(self.rect.left, self.rect.top)
 
     def set_text(self, text):
         self.text = text

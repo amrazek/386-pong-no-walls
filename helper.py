@@ -42,19 +42,19 @@ def line_circle_intersection(origin, radius, p1, p2):
 
         # convert parametrized segment intersection back into coordinate
         # and return it
-        return pygame.Vector2(p1.x + t * dx, p1.y + t * dy)
+        return make_vector(p1.x + t * dx, p1.y + t * dy)
     else:
         # must be two solutions
         t1 = (-b + math.sqrt(det)) / (2.0 * a)
         t2 = ((-b - math.sqrt(det)) / (2.0 * a))
 
         # return only solutions that lie on segment
-        return tuple((pygame.Vector2(p1.x + t * dx, p1.y + t * dy) for t in [t1, t2] if 0 <= t <= 1))
+        return tuple((make_vector(p1.x + t * dx, p1.y + t * dy) for t in [t1, t2] if 0 <= t <= 1))
 
 
 def line_line_intersection(line1_p1, line1_p2, line2_p1, line2_p2):
-    m1 = pygame.Vector2(line1_p2.x - line1_p1.x, line1_p2.y - line1_p1.y)
-    m2 = pygame.Vector2(line2_p2.x - line2_p1.x, line2_p2.y - line2_p1.y)
+    m1 = make_vector(line1_p2.x - line1_p1.x, line1_p2.y - line1_p1.y)
+    m2 = make_vector(line2_p2.x - line2_p1.x, line2_p2.y - line2_p1.y)
 
     if (m1.x == 0 and m1.y == 0) or (m2.x == 0 and m2.y == 0):
         return ()
@@ -73,8 +73,8 @@ def line_line_intersection(line1_p1, line1_p2, line2_p1, line2_p2):
 
         # calculate intersection points, or None if the intersection point does not lie
         # on its respective line segment
-        intersection1 = pygame.Vector2(line1_p1.x + t1 * m1.x, line2_p1.y + t1 * m1.y) if 0 <= t1 <= 1 else None
-        intersection2 = pygame.Vector2(line2_p1.x + t2 * m2.x, line2_p1.y + t2 * m2.y) if 0 <= t2 <= 1 else None
+        intersection1 = make_vector(line1_p1.x + t1 * m1.x, line2_p1.y + t1 * m1.y) if 0 <= t1 <= 1 else None
+        intersection2 = make_vector(line2_p1.x + t2 * m2.x, line2_p1.y + t2 * m2.y) if 0 <= t2 <= 1 else None
 
         if intersection1 is None and intersection2 is None:
             return ()  # no intersections on either segment
@@ -83,3 +83,11 @@ def line_line_intersection(line1_p1, line1_p2, line2_p1, line2_p2):
 
 
 Dimensions = collections.namedtuple('Dimensions', 'width height')
+
+
+def make_vector(x=0.0, y=0.0):
+    v = pygame.Vector2()
+    v.x = x
+    v.y = y
+
+    return v

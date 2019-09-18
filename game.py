@@ -23,7 +23,7 @@ elapsed_time = 0.0
 # create initial game state: this will control each stage of the game
 state = GameState.create_initial(input_state)
 
-while not input_state.quit and (state is not None and not state.finished):
+while not input_state.quit and state is not None:
     input_state.event_loop()
     state.update(elapsed_time)
     state.draw(screen)

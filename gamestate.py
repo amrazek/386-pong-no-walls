@@ -1,10 +1,10 @@
-import math
 import pygame
 from pygame.locals import *
 import config
 from board import Board
 import players
 import entities
+from helper import make_vector
 
 
 class InputState:
@@ -86,7 +86,7 @@ class PlayGame(GameState):
                            state=self,
                            size=config.WINDOW_SIZE,
                            left_player_generator=players.ComputerPlayer,
-                           right_player_generator=players.Player)
+                           right_player_generator=players.HumanPlayer)
 
     @property
     def next_state(self):
@@ -152,23 +152,26 @@ class BeginGame(GameState):
 
         self._countdown_messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in _countdown_messages]
 
-        board_center = pygame.Vector2(config.WINDOW_SIZE.width * 0.5, config.WINDOW_SIZE.height * 0.5)
+        board_center = make_vector(config.WINDOW_SIZE.width * 0.5, config.WINDOW_SIZE.height * 0.5)
 
         for msg in self._countdown_messages:
-            center = board_center - pygame.Vector2(msg.rect.width * 0.5, msg.rect.height * 0.5)
+            center = board_center - make_vector(msg.rect.width * 0.5, msg.rect.height * 0.5)
             msg.set_position(center)
 
         # determine how many more points each player needs to win
         left_points_needed = BeginGame.calc_points_needed(self.points[0], self.points[1])
         right_points_needed = BeginGame.calc_points_needed(self.points[1], self.points[0])
 
-        self._left_spr = entities.TextSprite(text=str(left_points_needed) + " points to go!", color=config.SCORE_COLOR)
-        self._right_spr = entities.TextSprite(text=str(right_points_needed) + " points to go!", color=config.SCORE_COLOR)
+        self._left_spr = entities.TextSprite(text=str(left_points_needed) + " points to go!",
+                                             color=config.SCORE_COLOR)
+
+        self._right_spr = entities.TextSprite(text=str(right_points_needed) + " points to go!",
+                                              color=config.SCORE_COLOR)
 
         def center_text(text_sprite, board_location):
             text_sprite.rect.center = board_location
 
-        quarter_offset = pygame.Vector2(config.WINDOW_SIZE.width * 0.25, 0)
+        quarter_offset = make_vector(config.WINDOW_SIZE.width * 0.25, 0)
 
         center_text(self._left_spr, board_center - quarter_offset)
         center_text(self._right_spr, board_center + quarter_offset)
@@ -214,7 +217,8 @@ class BeginGame(GameState):
             if delta_score > config.MIN_POINT_DIFFERENCE_TO_WIN and target_winning:
                 return config.MIN_POINTS_TO_WIN_GAME - target_player_points
             else:
-                return max(config.MIN_POINTS_TO_WIN_GAME - target_player_points, other_player_points + config.MIN_POINT_DIFFERENCE_TO_WIN - target_player_points)
+                return max(config.MIN_POINTS_TO_WIN_GAME - target_player_points,
+                           other_player_points + config.MIN_POINT_DIFFERENCE_TO_WIN - target_player_points)
 
         else:  # target player has at least the minimum points
             # they need other player's + 2
@@ -231,7 +235,8 @@ class GameVictory(GameState):
         self.board = previous_state.board
 
         # create "X won game" message
-        winner, score = (self.board.left_player, self.games_won[0]) if self.points[0] > self.points[1] else (self.board.right_player, self.games_won[1])
+        winner, score = (self.board.left_player, self.games_won[0]) \
+            if previous_state.board.get_status() == Board.LEFT_PLAYER else (self.board.right_player, self.games_won[1])
 
         self._game_won = entities.TextSprite(
             text=winner.name + " has won " + str(score) + " of " + str(config.NUMBER_GAMES_REQUIRED_VICTORY * 2 - 1),
@@ -281,7 +286,8 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
 
         # create "X won game" message
         winner, score = (previous_state.board.left_player, previous_state.games_won[0]) \
-            if self.points[0] > self.points[1] else (previous_state.board.right_player, self.games_won[1])
+            if previous_state.board.get_status() == Board.LEFT_PLAYER \
+            else (previous_state.board.right_player, self.games_won[1])
 
         self._game_won = entities.TextSprite(
             text=winner.name + " wins! ", color=config.SCORE_COLOR, size=26)
@@ -291,8 +297,8 @@ class GameOver(GameState):  # this state occurs when an overall winner is found
 
         self._game_won.set_center(previous_state.board.bounds.center)
 
-        below_won_prompt = pygame.Vector2(self._game_won.rect.centerx, \
-                                          self._game_won.rect.bottom + self._play_again.rect.height)
+        below_won_prompt = make_vector(self._game_won.rect.centerx,
+                                       self._game_won.rect.bottom + self._play_again.rect.height)
         self._play_again.set_center(below_won_prompt)
 
         # track display time
