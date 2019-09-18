@@ -58,6 +58,9 @@ class Board:
         self._passives.add(self._left_score, self._right_score)
 
     def update(self, elapsed):
+        if self._status != Board.IN_PROGRESS:
+            return
+
         self._ball.update(elapsed, self._paddles)
         self._paddles.update(elapsed)
 
@@ -72,6 +75,9 @@ class Board:
                 self._status = Board.RIGHT_PLAYER
             else:
                 self._status = Board.LEFT_PLAYER
+
+            if config.BALL_OUT is not None:
+                config.BALL_OUT.play()
 
     def update_scores(self, state):
         self._left_score.set_text(self._left_player.get_name() + ": " + str(state.points[0]))

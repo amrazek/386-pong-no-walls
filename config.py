@@ -14,8 +14,8 @@ PADDLE_SPEED = 400.0
 PADDLE_BALL_VELOCITY_MODIFIER = 1.75  # this multiplies the velocity bonus ball gets from a moving paddle
 
 BALL_RADIUS = 10
-BALL_MIN_SPEED = 300.0
-BALL_MAX_SPEED = 500.0
+BALL_MIN_SPEED = 375.0
+BALL_MAX_SPEED = 600.0
 
 NET_DASH_LENGTH = 15
 NET_WIDTH = 2
@@ -38,6 +38,7 @@ VICTORY_SHORT = None
 FAILURE_SHORT = None
 VICTORY_LONG = None
 FAILURE_LONG = None
+BALL_OUT = None
 
 
 def load_images():
@@ -73,6 +74,7 @@ def load_sounds():
     global VICTORY_LONG
     global FAILURE_SHORT
     global FAILURE_LONG
+    global BALL_OUT
 
     if pygame.mixer:
         pygame.mixer.init()
@@ -90,6 +92,7 @@ def load_sounds():
         VICTORY_LONG = load_sound("Fanfare 02.ogg")
         FAILURE_SHORT = load_sound("lose.wav")
         FAILURE_LONG = load_sound("GameOver.ogg")
+        BALL_OUT = load_sound("out.wav")
 
 
 def load_sound(file_name):

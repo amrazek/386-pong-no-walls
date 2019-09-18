@@ -86,7 +86,7 @@ class PlayGame(GameState):
                            state=self,
                            size=config.WINDOW_SIZE,
                            left_player_generator=players.ComputerPlayer,
-                           right_player_generator=players.ComputerPlayer)
+                           right_player_generator=players.HumanPlayer)
 
     @property
     def next_state(self):
@@ -146,17 +146,20 @@ class BeginGame(GameState):
         self._game = PlayGame(input_state, previous_state)
         self._display_time = 0
 
-        _countdown_messages = \
+        str_messages = \
             ["Game starts in " + str(x) for x in reversed(range(1, config.COUNTDOWN_BEGIN + 1))]
-        _countdown_messages.append("Begin!")
+        str_messages.append("Begin!")
 
-        self._countdown_messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in _countdown_messages]
+        self._countdown_messages = [entities.TextSprite(text=x, color=config.SCORE_COLOR) for x in str_messages]
 
         board_center = make_vector(config.WINDOW_SIZE.width * 0.5, config.WINDOW_SIZE.height * 0.5)
 
         for msg in self._countdown_messages:
             center = board_center - make_vector(msg.rect.width * 0.5, -msg.rect.height * 1.5)
             msg.set_position(center)
+
+        game_text = entities.TextSprite(text="Game " + str(sum(self.games_won) + 1), color=config.SCORE_COLOR)
+        game_text.set_center(board_center - make_vector(0, game_text.rect.height * 2))
 
         # determine how many more points each player needs to win
         left_points_needed = BeginGame.calc_points_needed(self.points[0], self.points[1])
@@ -173,25 +176,23 @@ class BeginGame(GameState):
         left_player_wins_text = entities.TextSprite(text=str(self.games_won[0]) + " wins", color=config.SCORE_COLOR)
         right_player_wins_text = entities.TextSprite(text=str(self.games_won[1]) + " wins", color=config.SCORE_COLOR)
 
-        def center_text(text_sprite, board_location):
-            text_sprite.rect.center = board_location
-
         quarter_offset = make_vector(config.WINDOW_SIZE.width * 0.25, 0)
 
-        center_text(left_points_text, board_center - quarter_offset)
-        center_text(right_points_text, board_center + quarter_offset)
+        left_points_text.set_center(board_center - quarter_offset)
+        right_points_text.set_center(board_center + quarter_offset)
 
         quarter_offset.y = -(left_points_text.rect.height + left_player_wins_text.rect.height)
 
-        center_text(left_player_wins_text, board_center - quarter_offset)
+        left_player_wins_text.set_center(board_center - quarter_offset)
         quarter_offset.y *= -1
 
-        center_text(right_player_wins_text, board_center + quarter_offset)
+        right_player_wins_text.set_center(board_center + quarter_offset)
 
         self._text_group = pygame.sprite.Group(left_player_wins_text,
                                                left_points_text,
                                                right_player_wins_text,
-                                               right_points_text)
+                                               right_points_text,
+                                               game_text)
 
     @property
     def next_state(self):
@@ -220,8 +221,6 @@ class BeginGame(GameState):
             screen.blit(source=current.image, dest=current.rect)
 
         self._text_group.draw(screen)
-        # screen.blit(source=self._left_spr.image, dest=self._left_spr.rect)
-        # screen.blit(source=self._right_spr.image, dest=self._right_spr.rect)
 
     @staticmethod
     def calc_points_needed(target_player_points, other_player_points):
@@ -257,7 +256,7 @@ class GameVictory(GameState):
             if previous_state.board.get_status() == Board.LEFT_PLAYER else (self.board.right_player, self.games_won[1])
 
         self._game_won = entities.TextSprite(
-            text=winner.name + " has won " + str(score) + " of " + str(config.NUMBER_GAMES_REQUIRED_VICTORY * 2 - 1),
+            text=winner.name + " has won " + str(score) + " of " + str(sum(self.games_won)) + " games",
             color=config.SCORE_COLOR)
 
         self._game_won.set_center(self.board.bounds.center)
