@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 import math
+import random
 import helper
 import config
 
@@ -37,6 +38,7 @@ class Ball(pygame.sprite.Sprite):
                 else:
                     self.velocity.y = -self.velocity.y
 
+                Ball.play_sound()
                 break
 
         self.position += delta_position
@@ -45,6 +47,16 @@ class Ball(pygame.sprite.Sprite):
 
     def get_position(self):
         return self.position
+
+    @staticmethod
+    def play_sound():
+        num_sounds = len(config.PADDLE_BOUNCE_SOUNDS)
+
+        if num_sounds == 0:
+            return
+
+        which = config.PADDLE_BOUNCE_SOUNDS[random.randint(0, len(config.PADDLE_BOUNCE_SOUNDS) - 1)]
+        which.play()
 
 
 class MovementDirection:

@@ -1,3 +1,4 @@
+import os
 from helper import Dimensions
 from pygame import Color
 import pygame
@@ -29,6 +30,7 @@ NUMBER_GAMES_REQUIRED_VICTORY = 1  # player must win this many games in a set fo
 MIN_POINTS_TO_WIN_GAME = 11  # player must have at least this many points to win a rally
 MIN_POINT_DIFFERENCE_TO_WIN = 2  # winner must have at least this many more points than loser to win a rally
 
+PADDLE_BOUNCE_SOUNDS = []
 
 def load_images():
     base_paddle_image = pygame.image.load("images/paddle.png")
@@ -55,3 +57,20 @@ def load_images():
     BALL_SURFACE.set_colorkey(mask_color)
 
     BALL_SURFACE = BALL_SURFACE.convert_alpha()
+
+
+def load_sounds():
+    global PADDLE_BOUNCE_SOUNDS
+
+    if pygame.mixer:
+        pygame.mixer.init()
+
+        pygame.mixer.music.load("sounds/your-call-by-kevin-macleod.mp3")
+        pygame.mixer.music.play(-1, 0)
+
+        for sound_path in [os.path.join("sounds", "blip") + str(i) + ".wav" for i in range(1, 6)]:
+            try:
+                sound = pygame.mixer.Sound(sound_path)
+                PADDLE_BOUNCE_SOUNDS.append(sound)
+            except pygame.error:
+                print("failed to load sound: ", sound_path)

@@ -4,10 +4,14 @@ from pygame.locals import *
 from gamestate import GameState, InputState
 from helper import *
 
+if pygame.mixer:
+    pygame.mixer.pre_init(22050, -16, 2, 1024)
+
 screen = pygame.display.set_mode(size=config.WINDOW_SIZE, flags=HWSURFACE)
 pygame.display.set_caption("Pong No Walls")
 pygame.font.init()
 config.load_images()
+config.load_sounds()
 
 clock = pygame.time.Clock()
 input_state = InputState()
