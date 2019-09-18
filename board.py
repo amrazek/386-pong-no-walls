@@ -4,6 +4,7 @@ import random
 import entities
 import config
 
+
 class PaddleType:
     VERTICAL = 0
     TOP = 1
@@ -174,7 +175,9 @@ class Board:
         velocity.x *= x_velocity_multiplier
 
         # todo: random velocity (angle AND speed)
-        return velocity * config.BALL_SPEED
+        #return velocity * config.BALL_SPEED
+
+        return pygame.Vector2(1, 0) * config.BALL_SPEED
 
     @classmethod
     def _create_text(cls, position, text=""):

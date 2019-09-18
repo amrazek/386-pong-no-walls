@@ -1,5 +1,4 @@
 import pygame
-from pygame.locals import *
 import math
 import random
 import helper
@@ -23,26 +22,31 @@ class Ball(pygame.sprite.Sprite):
     def update(self, elapsed_seconds, paddles):
         delta_position = self.velocity * elapsed_seconds
 
-        #next_position = self.position + delta_position
-        #intersections = helper.line_line_intersection(self.position, next_position, pygame.Vector2(600, 0), pygame.Vector2(600, 600))
+        ball_start = self.position
+        ball_end = ball_start + delta_position
 
-        next_rect = self.rect.copy()
-        next_rect.center = self.position + delta_position
+        # ball is on field, determine whether it has collided with any paddles
+        for paddle in pygame.sprite.spritecollide(sprite=self, group=paddles, dokill=False):
+            for segment in paddle.get_line_segments():
+                intersections = helper.line_circle_intersection(ball_end, config.BALL_RADIUS, segment[0], segment[1])
 
-        for paddle in paddles:
-            if next_rect.colliderect(paddle.rect):
-                is_vertical = True if paddle.rect.height > paddle.rect.width else False
+                if len(intersections) > 0:
+                    # this move has resulted in a collision!
+                    segment_dir = (segment[1] - segment[0]).normalize()
+                    vertical_line = pygame.Vector2(0, 1)
 
-                if is_vertical:
-                    self.velocity.x = -self.velocity.x
-                else:
-                    self.velocity.y = -self.velocity.y
+                    is_vertical = True if abs(segment_dir.dot(vertical_line)) >= 0.99 else False
 
-                Ball.play_sound()
-                break
+                    if is_vertical:
+                        self.velocity.x = -self.velocity.x
+                    else:
+                        self.velocity.y = -self.velocity.y
+
+                    Ball.play_sound()
+
+                    return
 
         self.position += delta_position
-        self.rect = next_rect
         self.rect.center = self.position
 
     def get_position(self):
@@ -113,6 +117,16 @@ class Paddle(pygame.sprite.Sprite):
 
     def get_dimensions(self):
         return helper.Dimensions(self.rect.width, self.rect.height)
+
+    def get_line_segments(self):
+        top_left = pygame.Vector2(self.rect.left, self.rect.top)
+        top_right = pygame.Vector2(self.rect.right, self.rect.top)
+        bottom_right = pygame.Vector2(self.rect.right, self.rect.bottom)
+        bottom_left = pygame.Vector2(self.rect.left, self.rect.bottom)
+
+        return [(top_left, top_right),
+                (top_right, bottom_right),
+                (bottom_right, bottom_left), (bottom_left, top_right)]
 
 
 class Net(pygame.sprite.Sprite):

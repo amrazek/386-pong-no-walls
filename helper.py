@@ -49,7 +49,7 @@ def line_circle_intersection(origin, radius, p1, p2):
         t2 = ((-b - math.sqrt(det)) / (2.0 * a))
 
         # return only solutions that lie on segment
-        return [tuple((pygame.Vector2(p1.x + t * dx, p1.y + t * dy) for t in [t1, t2] if 0 <= t <= 1))]
+        return tuple((pygame.Vector2(p1.x + t * dx, p1.y + t * dy) for t in [t1, t2] if 0 <= t <= 1))
 
 
 def line_line_intersection(line1_p1, line1_p2, line2_p1, line2_p2):
